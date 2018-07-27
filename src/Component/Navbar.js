@@ -97,7 +97,7 @@ class Navbar extends Component {
             </ListItem>
           </List>
         </div>
-        <div style={{ width: '75vw', marginLeft: '25vw', border: "2px solid", height: "100vh" }} className='col-2'>
+        <div style={{ width: '75vw', marginLeft: '25vw', overflow: 'auto'}} className='col-2'>
           <Appbar />
           {/* {this.props.children} */}
           <Home/>
