@@ -134,22 +134,6 @@ class Home extends Component {
                         </Card>
                     </Grid>
                 </Grid>
-                <Grid container direction={'row'} justify="center"  >
-                    <Grid item md={8} xs={10} style={{ padding: 15 }}  >
-                        <Card >
-                            <CardContent style={{ display: "flex", flexDirection: "row", justifyContent: "space-between" }} >
-                                <BarChart />
-                            </CardContent>
-                        </Card>
-                    </Grid>
-                    <Grid item md={4} xs={10} style={{ padding: 15 }}  >
-                        <Card >
-                            <CardContent style={{ display: "flex", flexDirection: "row", justifyContent: "space-between" }} >
-                                <DoughnutChart />
-                            </CardContent>
-                        </Card>
-                    </Grid>
-                </Grid>
                 <Grid container justify='center' direction={'row'}>
                     <Grid item md={8} xs={10} style={{ padding: 15 }}>
                         <Card >
