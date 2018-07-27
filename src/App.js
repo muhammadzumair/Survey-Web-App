@@ -1,43 +1,40 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import { InputField, List } from './githubComponent';
-import {connect} from 'react-redux';
+import { connect } from 'react-redux';
 import GitAction from './store/action/github';
 import './App.css';
-
+import Navbar from './Component/Navbar';
 class App extends Component {
-  constructor(props){
+  constructor(props) {
     super(props);
     this.state = {
-      userInput : ""
+      userInput: ""
     }
   }
-  keyPress = (e) =>{
-    if(e.key === "Enter"){
+  keyPress = (e) => {
+    if (e.key === "Enter") {
       this.props.getUserData(this.state.userInput);
     }
   }
   render() {
     return (
       <div className="App">
-        <InputField
-          value = {this.state.userInput}
-          onChange = {(e) => this.setState({userInput: e.target.value})}
-          onKeyPress = {this.keyPress}/>
+        <Navbar />
       </div>
     );
   }
 }
 
-let mapStateToProps = (state) =>{
+let mapStateToProps = (state) => {
   console.log(state);
-  return{
-    
+  return {
+
   }
 }
 
 let mapDispatchToProps = (dispatch) => {
-  return{
+  return {
     getUserData: (name) => dispatch(GitAction.getUserInfo(name))
   }
 }

@@ -1,0 +1,19 @@
+@media screen and (max-width: 800px) {
+    .list-text{
+        display: none;
+    }
+    .list-heading{
+        visibility: hidden;
+    }
+    .align-center{
+        display: flex !important;
+        justify-content: center !important;
+    }
+    .col-1{
+        width: 12vw !important;
+    }
+    .col-2{
+        width: 88vw !important;
+        margin-left: 12vw !important;
+    }
+}
