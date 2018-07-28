@@ -1,17 +1,16 @@
 import React, { Component } from "react";
 // import Navbar from "../../Component/Navbar";
 import Card from '@material-ui/core/Card';
+import { connect } from 'react-redux';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import Divider from '@material-ui/core/Divider';
 import Typography from '@material-ui/core/Typography';
-import DoughnutChart from '../Component/DoughnutChart'
+import DoughnutChart from '../Component/DoughnutChart';
 import BarChart from '../Component/BarChart';
-import { connect } from "react-redux"
-import DBActions from "../store/action/DBActions";
-
+import DBActions from '../store/action/DBActions'
 
 class Home extends Component {
 
@@ -27,10 +26,10 @@ class Home extends Component {
 
     componentDidMount() {
         this.props.getHourlyData("24-07-2018", "Tariq Road");
-        
+
     }
-    componentWillReceiveProps(nextProps){
-        if(nextProps){
+    componentWillReceiveProps(nextProps) {
+        if (nextProps) {
             this.calculateResponsesHourlyWise(nextProps.hourlyData)
         }
     }
@@ -77,7 +76,7 @@ class Home extends Component {
                     }
                 }
             })
-            console.log(this.happyHourCount,this.angryHourCount,this.moderateHourCount)
+            console.log(this.happyHourCount, this.angryHourCount, this.moderateHourCount)
         }
     }
 
@@ -151,23 +150,42 @@ class Home extends Component {
                         </Card>
                     </Grid>
                 </Grid>
+                <Grid container justify='center' direction={'row'}>
+                    <Grid item md={8} xs={10} style={{ padding: 15 }}>
+                        <Card >
+                            <CardContent style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+
+                            </CardContent>
+                        </Card>
+                    </Grid>
+                    <Grid item md={4} xs={10} style={{ padding: 15 }}>
+                        <Card >
+                            <CardContent style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                                <DoughnutChart />
+                            </CardContent>
+                        </Card>
+                    </Grid>
+                </Grid>
+                <Grid container justify='center' direction={'row'}>
+                    <Grid item md={10} xs={10} style={{ padding: 15 }}>
+                        <BarChart />
+                    </Grid>
+                </Grid>
             </div>
         )
     }
 
 }
-let mapStateToProps = (state) => {
+
+const mapStateToPorps = (state) => {
+    console.log('state: ', state)
     return {
-        isProgress: state.DBReducer.isProgress,
-        hourlyData: state.DBReducer.hourlyData
+        hourlyData: state.dbReducer.hourlyData
     }
 }
-let mapDispatchToProps = (dispatch) => {
+const mapDispatchToPorps = (dispatch) => {
     return {
-        getHourlyData: (date, branch) => dispatch(DBActions.getHourlyData(date, branch))
+        getHourlyData: (obj) => dispatch(DBActions.getHourlyData(obj))
     }
 }
-
-export default connect(mapStateToProps, mapDispatchToProps)(Home)
-
-
+export default connect(mapStateToPorps, mapDispatchToPorps)(Home)
