@@ -1,16 +1,16 @@
 import { combineReducers, createStore, applyMiddleware } from 'redux';
 import { combineEpics, createEpicMiddleware } from 'redux-observable';
 
-import EpicGitAction from './epic/github';
-import githubReducer from './reducer/github';
+import EpicActions from './epic/EpicActions';
+import DBReducer from './reducer/DBReducer';
 
 
 const rootReducer = combineReducers({
-    githubReducer
+    DBReducer
 });
 
 export const rootEpic = combineEpics(
-    EpicGitAction.getUserInfo
+    
 );
 
 const epicMiddleware = createEpicMiddleware(rootEpic);

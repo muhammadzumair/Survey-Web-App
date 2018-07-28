@@ -1,0 +1,20 @@
+@media only screen and (max-width: 850px) {
+    .listText{
+        display: none
+    }
+    .listHeading{
+        visibility: hidden !important
+    }
+    .centerIcon{
+        display: flex !important;
+        justify-content: center !important;
+        
+    }
+    .col1{
+       width: 12vw  !important
+    }
+    .col2{
+        width: 88vw !important;
+        margin-left: 12vw !important
+    }
+}
