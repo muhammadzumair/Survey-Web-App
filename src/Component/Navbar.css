@@ -1,20 +1,19 @@
-@media only screen and (max-width: 850px) {
-    .listText{
-        display: none
+@media screen and (max-width: 800px) {
+    .list-text{
+        display: none;
     }
-    .listHeading{
-        visibility: hidden !important
+    .list-heading{
+        visibility: hidden;
     }
-    .centerIcon{
+    .align-center{
         display: flex !important;
         justify-content: center !important;
-        
     }
-    .col1{
-       width: 12vw  !important
+    .col-1{
+        width: 12vw !important;
     }
-    .col2{
+    .col-2{
         width: 88vw !important;
-        margin-left: 12vw !important
+        margin-left: 12vw !important;
     }
 }

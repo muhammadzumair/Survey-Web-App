@@ -1,43 +1,25 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import { withStyles } from '@material-ui/core/styles';
-import Drawer from '@material-ui/core/Drawer';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import List from '@material-ui/core/List';
-import Typography from '@material-ui/core/Typography';
-import IconButton from '@material-ui/core/IconButton';
-import Hidden from '@material-ui/core/Hidden';
-import Divider from '@material-ui/core/Divider';
-import MenuIcon from '@material-ui/icons/Menu';
-import ListItem from '@material-ui/core/ListItem/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import InboxIcon from '@material-ui/icons/Inbox';
+import React, { Component } from "react";
+import { connect } from "react-redux";
 import DashboardIcon from '@material-ui/icons/Dashboard';
-import BarChartIcon from '@material-ui/icons/BarChart';
-import AddCircleIcon from '@material-ui/icons/AddCircleOutline';
+import ChartIcon from '@material-ui/icons/BarChart';
+import AddIcon from '@material-ui/icons/AddCircleOutline';
 import InputIcon from '@material-ui/icons/Input';
-import Grid from "@material-ui/core/Grid";
-import DraftsIcon from '@material-ui/icons/Tab';
-import SpaceBar from '@material-ui/icons/SpaceBar';
-import Button from '@material-ui/core/Button'
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import Divider from '@material-ui/core/Divider';
 import Appbar from './Appbar';
+import Home from '../Container/Home'
 import './Navbar.css';
-import Home from  '../Container/Home/Home';
 
-
-
-
-
-const drawerWidth = 240;
+const color = '#3f3f3f'
 const styles = {
   listText: {
     fontSize: '17px',
     fontFamily: 'sans-serif',
     paddingLeft: '15px',
     color: 'white',
-    fontWeight: 'bold'
+    fontWeight: 'bold',
   },
   circularStyle: {
     height: '87vh',
@@ -47,87 +29,96 @@ const styles = {
   }
 }
 
-
-
-export default class Navbar extends React.Component {
-
+class Navbar extends Component {
   constructor(props) {
     super(props);
-    this.state = { color: { home: "#6c6c6c", reason: "#6c6c6c", add: "#6c6c6c", logout: "#6c6c6c" } }
+    this.state = {
+      component: 'table',
+      colorObj: {
+        home: '#6c6c6c',
+        reason: '#6c6c6c',
+        logout: '#6c6c6c',
+        add: '#6c6c6c'
+      }
+    }
+  }
+  componentWillReceiveProps(nextProps) {
+    console.log("user", nextProps.user);
+    if (nextProps.user === null) {
+      console.log("user", nextProps.user);
+      this.props.history.replace('/');
+    }
   }
 
   clicked = (name) => {
-    let obj = this.state.color
-
+    let obj = this.state.colorObj;
     for (let i in obj) {
-      obj[i] = "#6c6c6c"
-
+      obj[i] = '#6c6c6c'
     }
-    obj[name] = "#37a4d2"
-    this.setState({ color: obj })
+    obj[name] = '#37a4d2';
+    this.setState({ colorObj: obj });
   }
 
   render() {
-
-
-
     return (
-      <div style={{ display: "flex" }}  >
-        <div className={"col1"} style={{ width: '25vw', position: "fixed", backgroundColor: "#3f3f3f", height: "100vh" }} >
+      <div style={{ display: 'flex', flex: 1 }}>
+        <div style={{ width: '25vw', position: 'fixed', border: "2px solid", backgroundColor: "#3d3d3d", height: '100vh' }} className='col-1'>
           <List component="nav" >
-            <ListItem button style={{ padding: 0, margin: 0 }} >
-              <ListItemText className={"listHeading"} primary={<h1 style={{ color: "#fff", padding: "1%", margin: "4%", textAlign: "center" }} >Survey Admin</h1>} >
-              </ListItemText>
+            <ListItem button style={{ padding: 0, margin: 0 }} onClick={() => this.clicked("kitchen")} className='align-center'>
+              <h1 style={{ color: 'white', margin: 14, padding: 1 }} className='list-heading'>Survey Admin</h1>
             </ListItem>
-            <Divider className={"listText"} style={{ backgroundColor: "#686868" }} />
-            <ListItem button className={"centerIcon"} onClick={() => this.clicked("home")}>
-              <ListItemIcon  >
-                <DashboardIcon style={{ marginRight: "0px", color: "#8e908e", color: this.state.color.home }} />
+            <Divider className='list-text' />
+            <ListItem button onClick={() => this.clicked("home")} className='align-center'>
+              <ListItemIcon>
+                <DashboardIcon style={{ marginRight: "0px", color: this.state.colorObj.home }} />
               </ListItemIcon>
-              <p className={"listText"} style={styles.listText}>Home</p>
+              <p style={styles.listText} className='list-text'>Home</p>
             </ListItem>
             <Divider />
-            <ListItem button className={"centerIcon"} onClick={() => this.clicked("reason")}>
+            <ListItem button onClick={() => this.clicked("reason")} className='align-center'>
               <ListItemIcon>
-                <BarChartIcon style={{ marginRight: "0px", color: "#8e908e", color: this.state.color.reason }} />
+                <ChartIcon style={{ marginRight: "0px", color: this.state.colorObj.reason }} />
               </ListItemIcon>
-              <p className={"listText"} style={styles.listText}>Reason Analytics</p>
+              <p style={styles.listText} className='list-text'>Reason Analytics</p>
             </ListItem>
             <Divider />
-            <ListItem button className={"centerIcon"} onClick={() => this.clicked("add")}>
+            <ListItem button onClick={() => this.clicked("add")} className='align-center'>
               <ListItemIcon>
-                <AddCircleIcon style={{ marginRight: "0px", color: "#8e908e", color: this.state.color.add }} />
+                <AddIcon style={{ marginRight: "0px", color: this.state.colorObj.add }} />
               </ListItemIcon>
-              <p className={"listText"} style={styles.listText}>Add Branch</p>
+              <p style={styles.listText} className='list-text'>Add Branch</p>
             </ListItem>
             <Divider />
-            <ListItem className={"centerIcon"} button onClick={() => this.clicked("logout")}>
+            <ListItem button onClick={() => this.clicked("logout")} className='align-center'>
               <ListItemIcon>
-                <InputIcon style={{ marginRight: "0px", color: "#8e908e", color: this.state.color.logout }} />
+                <InputIcon style={{ marginRight: "0px", color: this.state.colorObj.logout }} />
               </ListItemIcon>
-              <p className={"listText"} style={styles.listText}>Logout</p>
+              <p style={styles.listText} className='list-text'>Logout</p>
             </ListItem>
           </List>
         </div>
-        <div className={"col2"} style={{ width: "75vw", backgroundColor: "cyan", marginLeft: "25vw", height: "100vh",overflowY:"scroll" }}>
-
+        <div style={{ width: '75vw', marginLeft: '25vw', border: "2px solid", height: "100vh" }} className='col-2'>
           <Appbar />
-          <Home />
-
+          {/* {this.props.children} */}
+          <Home/>
         </div>
-        {
-          // this.state.component === "menu" ?
-          //   <Menu />
-          //   :
-          //   this.state.component === "table" ?
-          //     <Table />
-          //     :this.state.component==="kitchen"?
-          //     <Kitchen />:
-          //     <Bill />
-        }
 
       </div>
     );
   }
 }
-
+const mapStateToProps = state => {
+  console.log(state);
+  return {
+    // user: state.AuthReducer.user,
+    // isLoading: state.TableReducer.isLoading,
+  };
+};
+const mapDispatchToProps = dispatch => {
+  return {
+  };
+};
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Navbar);
