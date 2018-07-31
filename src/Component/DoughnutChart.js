@@ -15,7 +15,6 @@ constructor(props){
                   617594,
                   181045,
                   153060,
-                  
                 ],
                 backgroundColor:[
                   '#4FAB56',
@@ -27,12 +26,11 @@ constructor(props){
             ]
           }
     }
-
 }
 render(){
     return(
         <Doughnut
-        data={this.state.chartData}
+        data={this.props.chartData}
         height={500}
         options={{
             title:{

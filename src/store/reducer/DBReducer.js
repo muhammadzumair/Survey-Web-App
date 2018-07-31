@@ -4,9 +4,10 @@ let intialState = {
     isProgress: false,
     isError: false,
     errorMessage: '',
-    hourlyData: null,
+    hourlyData: [],
     weeklyData: [],
-    realTimeData: []
+    realTimeData: [],
+    hourlyDataFlag: true,
 }
 
 function DBReducer(state = intialState, action) {
@@ -14,9 +15,15 @@ function DBReducer(state = intialState, action) {
         case actionTypes.GET_HOURLY_DATA_PROGRESS:
             return Object.assign({}, state, { isProgress: true });
         case actionTypes.GET_HOURLY_DATA_SUCCEED:
-            return Object.assign({}, state, { isProgress: false, hourlyData: action.payload });
+            return Object.assign({}, state, { isProgress: false, hourlyData: action.payload, hourlyDataFlag: true });
         case actionTypes.GET_HOURLY_DATA_FAIL:
             return Object.assign({}, state, { isError: true, errorMessage: action.payload });
+        // case actionTypes.GET_HOURLY_DATA_UPDATE:
+        //     return Object.assign({}, state, { realTimeData: [...state.realTimeData, action.payload], hourlyDataFlag: action.hourlyDataFlag });
+        case actionTypes.GET_HOURLY_DATA_FLAG_FALSE:
+            return Object.assign({}, state, { hourlyDataFlag: false });
+
+
         case actionTypes.MAKE_ISERROR_FALSE:
             return Object.assign({}, state, { isError: false });
 
@@ -37,6 +44,7 @@ function DBReducer(state = intialState, action) {
             return Object.assign({}, state, { realTimeData: action.payload });
         case actionTypes.GET_REALTIME_DATA_FAIL:
             return Object.assign({}, state, { isError: true, errorMessage: action.payload });
+
 
         default:
             return state;

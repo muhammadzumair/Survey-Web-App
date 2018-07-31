@@ -2,39 +2,49 @@ import React, { Component } from "react";
 // import Navbar from "../../Component/Navbar";
 import Card from '@material-ui/core/Card';
 import { connect } from 'react-redux';
-import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
-import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
-import Divider from '@material-ui/core/Divider';
 import Typography from '@material-ui/core/Typography';
 import DoughnutChart from '../Component/DoughnutChart';
 import BarChart from '../Component/BarChart';
 import DBActions from '../store/action/DBActions';
 import FirebaseDB from "../store/Firebase/firebaseDB";
-import { concat } from "rxjs/observable/concat";
 
 class Home extends Component {
 
     constructor(props) {
         super(props);
-        this.angryCount = 0;
-        this.angryHourCount = [];
-        this.moderateCount = 0;
-        this.moderateHourCount = [];
-        this.happyCount = 0;
-        this.happyHourCount = [];
+        this.angryHourCountArray = [];
+        this.moderateHourCountArray = [];
+        this.happyHourCountArray = [];
         this.datesArray = [];
-        this.angryWeekCount = 0;
-        this.happyWeekCount = 0;
-        this.moderatWeekCount = 0;
         this.angryWeekCountArray = [];
         this.happyWeekCountArray = [];
         this.moderatWeekCountArray = [];
-        this.iteration = 0
+        this.moderateCount = 0;
+        this.angryCount = 0;
+        this.happyCount = 0;
+        this.angryWeekCount = 0;
+        this.happyWeekCount = 0;
+        this.moderatWeekCount = 0;
+        this.iteration = 0,
+            this.clicksObject = {};
+
+        this.state = {
+            angryHourCountArray: [],
+            happyHourCountArray: [],
+            moderateHourCountArray: [],
+            angryWeekCountArray: [],
+            happyWeekCountArray: [],
+            moderatWeekCountArray: [],
+            iteration: 0,
+            flag: true,
+            countClicks: {}
+        }
     }
 
     componentDidMount() {
+        this.props.getHourlyData({ date: '31-07-2018', branch: 'Tariq Road' });
         this.props.getRealtimeData('31-07-2018', 'Tariq Road');
         let date = this.getMonday('24,2018 july');
         let month = date.getMonth() + 1;
@@ -56,10 +66,54 @@ class Home extends Component {
 
     componentWillReceiveProps(nextProps) {
         this.iteration++;
-        if (nextProps) {
+        if (nextProps.state) {
             if (this.iteration == 7) {
-                this.calculateResponsesWeeklyWise(nextProps.weeklyData);
+                this.calculateResponsesWeeklyWise(nextProps.state.weeklyData);
+                this.calculateResponsesHourlyWise(nextProps.state.hourlyData);
+                this.dailyClicksCount(nextProps.state.hourlyData);
+                this.props.hourlyDataFlagFalse();
             }
+            if (this.iteration > 7 && nextProps.state.hourlyDataFlag) {
+                this.calculateResponsesHourlyWise(nextProps.state.hourlyData);
+                this.dailyClicksCount(nextProps.state.hourlyData);
+                this.props.hourlyDataFlagFalse();
+            }
+        }
+    }
+    dailyClicksCount = (array) => {
+        if (array) {
+            array.forEach((data, i) => {
+                let angryCount = this.clicksObject['angry'];
+                let happyCount = this.clicksObject['happy'];
+                let moderatCount = this.clicksObject['moderat'];
+                if (data.userResponse === 'angry') {
+                    if (angryCount) {
+                        angryCount++;
+                    } else {
+                        angryCount = 1
+                    }
+                    this.clicksObject['angry'] = angryCount;
+                }
+                if (data.userResponse === 'satisfied') {
+                    if (happyCount) {
+                        happyCount++;
+                    } else {
+                        happyCount = 1
+                    }
+                    this.clicksObject['happy'] = happyCount;
+                }
+                if (data.userResponse === 'moderat') {
+                    if (moderatCount) {
+                        moderatCount++;
+                    } else {
+                        moderatCount = 1
+                    }
+                    this.clicksObject['moderat'] = moderatCount;
+                }
+            });
+            this.setState({ countClicks: this.clicksObject }, function () {
+                this.clicksObject = {};
+            });
         }
     }
     calculateResponsesWeeklyWise = (array) => {
@@ -94,7 +148,23 @@ class Home extends Component {
                     this.moderatWeekCountArray[weekDay] = this.moderateWeekCount;
                 }
             });
+            this.setState({
+                moderatWeekCountArray: [...this.moderatWeekCountArray],
+                happyWeekCountArray: [...this.happyWeekCountArray],
+                angryWeekCountArray: [...this.angryWeekCountArray]
+            }, function () {
+                this.moderatWeekCountArray = [];
+                this.happyWeekCountArray = [];
+                this.angryWeekCountArray = [];
+                this.moderateWeekCount = 0;
+                this.angryWeekCount = 0;
+                this.happyWeekCount = 0
+            });
         }
+    }
+
+    shouldComponentUpdate(nextProps, nextState) {
+        return true;
     }
     getMonday = (d) => {
         d = new Date(d);
@@ -104,11 +174,11 @@ class Home extends Component {
     }
     calculateResponsesHourlyWise = (array) => {
         if (array) {
-            array.map(data => {
+            array.forEach((data, i) => {
                 let timeHours = new Date(data.timeStamp).getHours();
-                this.angryCount = this.angryHourCount[timeHours]
-                this.moderateCount = this.moderateHourCount[timeHours]
-                this.happyCount = this.happyHourCount[timeHours]
+                this.angryCount = this.angryHourCountArray[timeHours]
+                this.moderateCount = this.moderateHourCountArray[timeHours]
+                this.happyCount = this.happyHourCountArray[timeHours]
                 if (data.userResponse === "angry") {
                     if (this.angryCount) {
                         this.angryCount++;
@@ -116,7 +186,7 @@ class Home extends Component {
                     else {
                         this.angryCount = 1;
                     }
-                    this.angryHourCount[timeHours] = this.angryCount
+                    this.angryHourCountArray[timeHours] = this.angryCount
                 }
                 if (data.userResponse === "moderat") {
                     if (this.moderateCount) {
@@ -125,7 +195,7 @@ class Home extends Component {
                     else {
                         this.moderateCount = 1;
                     }
-                    this.moderateHourCount[timeHours] = this.moderateCount
+                    this.moderateHourCountArray[timeHours] = this.moderateCount
                 }
                 if (data.userResponse === "satisfied") {
                     if (this.happyCount) {
@@ -134,9 +204,22 @@ class Home extends Component {
                     else {
                         this.happyCount = 1
                     }
-                    this.happyHourCount[timeHours] = this.happyCount
+                    this.happyHourCountArray[timeHours] = this.happyCount
                 }
-            })
+            });
+            this.setState({
+                happyHourCountArray: [...this.happyHourCountArray],
+                moderateHourCountArray: [...this.moderateHourCountArray],
+                angryHourCountArray: [...this.angryHourCountArray]
+            },
+                function () {
+                    this.happyHourCountArray = [];
+                    this.moderateHourCountArray = [];
+                    this.angryHourCountArray = [];
+                    this.moderateCount = 0;
+                    this.angryCount = 0;
+                    this.happyCount = 0;
+                });
         }
     }
     render() {
@@ -152,8 +235,8 @@ class Home extends Component {
                                         Happy Clicks
                                 </Typography>
                                     <Typography variant="display2" style={{ textAlign: "center" }} gutterBottom>
-                                        0
-                                </Typography>
+                                        {this.state.countClicks['happy']}
+                                    </Typography>
                                 </div>
                             </CardContent>
 
@@ -166,10 +249,10 @@ class Home extends Component {
                                 <div style={{ display: "flex", flexDirection: "column", justifyContent: "center" }} >
                                     <Typography variant="caption" gutterBottom>
                                         Moderate Clicks
-                        </Typography>
+                                    </Typography>
                                     <Typography variant="display2" style={{ textAlign: "center" }} gutterBottom>
-                                        0
-                        </Typography>
+                                        {this.state.countClicks['moderat']}
+                                    </Typography>
                                 </div>
                             </CardContent>
 
@@ -182,10 +265,10 @@ class Home extends Component {
                                 <div style={{ display: "flex", flexDirection: "column", justifyContent: "center" }} >
                                     <Typography variant="caption" gutterBottom>
                                         Angry Clicks
-                        </Typography>
+                                    </Typography>
                                     <Typography variant="display2" style={{ textAlign: "center" }} gutterBottom>
-                                        0
-                        </Typography>
+                                        {this.state.countClicks['angry']}
+                                    </Typography>
                                 </div>
                             </CardContent>
 
@@ -196,21 +279,83 @@ class Home extends Component {
                     <Grid item md={8} xs={10} style={{ padding: 15 }}>
                         <Card >
                             <CardContent style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-
+                                <BarChart
+                                    chartData={{
+                                        labels: ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'], //x-axis label array
+                                        datasets: [
+                                            {
+                                                label: 'Happy',
+                                                data: this.state.happyHourCountArray,
+                                                backgroundColor: "#4FAB56"
+                                            },
+                                            {
+                                                label: 'Moderate',
+                                                data: this.state.moderateHourCountArray,
+                                                backgroundColor: '#F99D2C'
+                                            },
+                                            {
+                                                label: 'Angry',
+                                                data: this.state.angryHourCountArray,
+                                                backgroundColor: "#E83E3B"
+                                            }
+                                        ]
+                                    }}
+                                />
                             </CardContent>
                         </Card>
                     </Grid>
                     <Grid item md={4} xs={10} style={{ padding: 15 }}>
                         <Card >
                             <CardContent style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-                                <DoughnutChart />
+                                <DoughnutChart
+                                    chartData={{
+                                        labels: ['Happy', 'Moderate', 'Angry'],
+                                        datasets: [
+                                            {
+                                                label: 'Population',
+                                                data: [
+                                                    this.state.countClicks['happy'],
+                                                    this.state.countClicks['moderat'],
+                                                    this.state.countClicks['angry']
+                                                ],
+                                                backgroundColor: [
+                                                    '#4FAB56',
+                                                    '#F99D2C',
+                                                    '#E83E3B'
+
+                                                ]
+                                            }
+                                        ]
+                                    }}
+                                />
                             </CardContent>
                         </Card>
                     </Grid>
                 </Grid>
                 <Grid container justify='center' direction={'row'}>
                     <Grid item md={10} xs={10} style={{ padding: 15 }}>
-                        <BarChart />
+                        <BarChart
+                            chartData={{
+                                labels: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], //x-axis label array
+                                datasets: [
+                                    {
+                                        label: 'Happy',
+                                        data: this.state.happyWeekCountArray,
+                                        backgroundColor: "#4FAB56"
+                                    },
+                                    {
+                                        label: 'Moderate',
+                                        data: this.state.moderatWeekCountArray,
+                                        backgroundColor: '#F99D2C'
+                                    },
+                                    {
+                                        label: 'Angry',
+                                        data: this.state.angryWeekCountArray,
+                                        backgroundColor: "#E83E3B"
+                                    }
+                                ]
+                            }}
+                        />
                     </Grid>
                 </Grid>
             </div>
@@ -226,17 +371,17 @@ Date.prototype.addDays = function (days) {
 
 
 const mapStateToPorps = (state) => {
-    
+    console.log('newState: ', state);
     return {
-        hourlyData: state.dbReducer.hourlyData,
-        weeklyData: state.dbReducer.weeklyData,
+        state: state.dbReducer,
     }
 }
 const mapDispatchToPorps = (dispatch) => {
     return {
         getHourlyData: (obj) => dispatch(DBActions.getHourlyData(obj)),
         getWeeklyData: (date, branch) => dispatch(DBActions.getWeeklyData(date, branch)),
-        getRealtimeData: (date, branch) => dispatch(DBActions.getRealTimeData(date,branch))
+        getRealtimeData: (date, branch) => dispatch(DBActions.getRealTimeData(date, branch)),
+        hourlyDataFlagFalse: () => dispatch(DBActions.hourlyDataFlagFalse()),
     }
 }
 export default connect(mapStateToPorps, mapDispatchToPorps)(Home);

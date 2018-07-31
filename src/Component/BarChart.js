@@ -5,55 +5,48 @@ import { Bar } from 'react-chartjs-2';
 export default class BarChart extends Component {
     constructor(props) {
         super(props);
+        console.log('this.props In BarChart', this.props);
         this.state = {
-            chartData: {
-                labels: ['00', '01','02','03','04','05','06','07','08','09','10','11','12','13','14','15','16','17','18','19','20','21','22','23'],
-                datasets: [
-                    {
-                        label: 'Happy',
-                        data: [10],
-
-
-
-                        backgroundColor:"gray"
-                    },
-                    {
-                        label: 'Moderate',
-                        data: [15],
-
-
-
-                        backgroundColor: [
-                            'brown',
-                            
-                           
-
-                        ]
-                    },
-                    {
-                        label: 'sad',
-                        data: [25],
-
-
-
-                        backgroundColor: "yellow"
-                    }
-                ]
-            }
+            // chartData: {
+            //     labels: this.props.labelsArray, //x-axis label array
+            //     datasets: [
+            //         {
+            //             label: 'Happy',
+            //             data: this.props.happyDataArray,
+            //             backgroundColor:"gray"
+            //         },
+            //         {
+            //             label: 'Moderate',
+            //             data: this.props.moderateDataArray,
+            //             backgroundColor: [
+            //                 'brown',
+            //             ]
+            //         },
+            //         {
+            //             label: 'Angry',
+            //             data: this.props.angryDataArray,
+            //             backgroundColor: "yellow"
+            //         }
+            //     ]
+            // }
         }
+        
 
+    }
+    
+    componentWillReceiveProps(nextProps){
+        this.forceUpdate();
     }
     render() {
         return (
             <Bar
-                data={this.state.chartData}
-                height={500}
+                data={this.props.chartData}
+                height={350}
                 options={
                     {
-
                         title: {
                             display: true,
-                            text: 'this is heading',
+                            text: this.props.heading,
                             fontSize: 25
                         },
                         legend: {
