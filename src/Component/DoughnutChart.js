@@ -33,7 +33,7 @@ render(){
     return(
         <Doughnut
         data={this.state.chartData}
-        height="500"
+        height={500}
         options={{
             title:{
               display:true,

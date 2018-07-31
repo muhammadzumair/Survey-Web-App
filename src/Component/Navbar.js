@@ -43,9 +43,9 @@ class Navbar extends Component {
     }
   }
   componentWillReceiveProps(nextProps) {
-    console.log("user", nextProps.user);
+    
     if (nextProps.user === null) {
-      console.log("user", nextProps.user);
+      
       this.props.history.replace('/');
     }
   }
@@ -108,7 +108,7 @@ class Navbar extends Component {
   }
 }
 const mapStateToProps = state => {
-  console.log(state);
+ 
   return {
     // user: state.AuthReducer.user,
     // isLoading: state.TableReducer.isLoading,

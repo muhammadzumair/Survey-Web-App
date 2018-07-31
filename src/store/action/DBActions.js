@@ -8,6 +8,24 @@ class DBActions{
            payload: obj
        }
    }
+   static getWeeklyData(date,branch){
+       return {
+           type:actionTypes.GET_WEEKLY_DATA_PROGRESS,
+           payload:{date,branch}
+       }
+   }
+   static getRealTimeData(date,branch){
+       return{
+           type:actionTypes.GET_REALTIME_DATA,
+           payload:{date,branch}
+       }
+   }
+   static getRealTimeDataSucceed(array){
+    return {
+        type:actionTypes.GET_REALTIME_DATA_SUCCEED,
+        payload:array
+    }
+   }
 }
 
 export default DBActions;

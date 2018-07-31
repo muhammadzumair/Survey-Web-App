@@ -10,7 +10,9 @@ import Divider from '@material-ui/core/Divider';
 import Typography from '@material-ui/core/Typography';
 import DoughnutChart from '../Component/DoughnutChart';
 import BarChart from '../Component/BarChart';
-import DBActions from '../store/action/DBActions'
+import DBActions from '../store/action/DBActions';
+import FirebaseDB from "../store/Firebase/firebaseDB";
+import { concat } from "rxjs/observable/concat";
 
 class Home extends Component {
 
@@ -22,19 +24,100 @@ class Home extends Component {
         this.moderateHourCount = [];
         this.happyCount = 0;
         this.happyHourCount = [];
+        this.dateArray = [];
+        this.formattedDateArray = [];
+        this.angryWeekCount = 0;
+        this.happyWeekCount = 0;
+        this.moderateWeekCount = 0;
+        this.angryWeekCountArray = [];
+        this.happyWeekCountArray = [];
+        this.moderateWeekCountArray = [];
+        this.countProps=0;
     }
 
     componentDidMount() {
-        this.props.getHourlyData("24-07-2018", "Tariq Road");
+        // this.props.getHourlyData("24-07-2018", "Tariq Road");
 
+        // this.dateArray[0] = this.getMonday("24,2018 july");
+        // for (let i = 1; i <= 6; i++) {
+        //     this.dateArray.push(this.dateArray[0].addDays(i))
+
+        // }
+        // for (let i = 0; i < this.dateArray.length; i++) {
+        //     let date = this.dateArray[i].getDate();
+        //     let month = (this.dateArray[i].getMonth().toString().length > 1) ? this.dateArray[i].getMonth() + 1 : `0${this.dateArray[i].getMonth() + 1}`;
+        //     let year = this.dateArray[i].getFullYear();
+        //     let formattedDate = date + "-" + month + "-" + year;
+        //     this.formattedDateArray.push(formattedDate);
+        // }
+        // for (let i = 0; i < this.formattedDateArray.length; i++) {
+        //     this.props.getWeeklyData(this.formattedDateArray[i], "Tariq Road")
+        // }
+        // console.log(this.formattedDateArray)
+        this.props.getRealTimeData("31-07-2018","Tariq Road");
+        
     }
+
+
+    getMonday = (d) => {
+        d = new Date(d);
+        var day = d.getDay(),
+            diff = d.getDate() - day + (day == 0 ? -6 : 1); // adjust when day is sunday
+        return new Date(d.setDate(diff));
+    }
+
     componentWillReceiveProps(nextProps) {
+        this.countProps+=1;
+        
         if (nextProps) {
-            this.calculateResponsesHourlyWise(nextProps.hourlyData)
+            // this.calculateResponsesHourlyWise(nextProps.hourlyData);
+        }
+        if(this.countProps==7)
+        this.calculateResponsesWeeklyWise(nextProps.weeklyData)
+        
+    }
+    calculateResponsesWeeklyWise = (array) => {
+        
+        if (array) {
+            array.forEach(data => {
+                
+                let weekDay = new Date(data.timeStamp).getDay();
+                this.angryWeekCount = this.angryWeekCountArray[weekDay];
+                this.happyWeekCount = this.happyWeekCountArray[weekDay];
+                this.moderateWeekCount = this.moderateWeekCountArray[weekDay];
+                if (data.userResponse === "angry") {
+                    if (this.angryWeekCount) {
+                        this.angryWeekCount++;
+                    }
+                    else {
+                        this.angryWeekCount = 1
+                    }
+                    this.angryWeekCountArray[weekDay] = this.angryWeekCount;
+                }
+                if (data.userResponse === "moderat") {
+                    if (this.moderateWeekCount) {
+                        this.moderateWeekCount++;
+                    }
+                    else {
+                        this.moderateWeekCount = 1;
+                    }
+                    this.moderateWeekCountArray[weekDay] = this.moderateWeekCount;
+                }
+                if (data.userResponse === "satisfied") {
+                    if(this.happyWeekCount){
+                        this.happyWeekCount++;
+                    }
+                    else{
+                        this.happyWeekCount=1
+                    }
+                    this.happyWeekCountArray[weekDay]=this.happyWeekCount
+                }
+            })
+            
         }
     }
     calculateResponsesHourlyWise = (array) => {
-        console.log("in function")
+       
         if (array) {
             array.map(data => {
                 let timeHours = new Date(data.timeStamp).getHours();
@@ -76,12 +159,13 @@ class Home extends Component {
                     }
                 }
             })
-            console.log(this.happyHourCount, this.angryHourCount, this.moderateHourCount)
+            
         }
     }
+    
 
     render() {
-
+        
         return (
             <div>
                 <Grid container direction={'row'} justify="center"  >
@@ -160,16 +244,25 @@ class Home extends Component {
     }
 
 }
+Date.prototype.addDays = function (days) {
+    var date = new Date(this.valueOf());
+    date.setDate(date.getDate() + days);
+    return date;
+}
+
 
 const mapStateToPorps = (state) => {
-    console.log('state: ', state)
+    
     return {
-        hourlyData: state.dbReducer.hourlyData
+        hourlyData: state.dbReducer.hourlyData,
+        weeklyData: state.dbReducer.weeklyData
     }
 }
 const mapDispatchToPorps = (dispatch) => {
     return {
-        getHourlyData: (obj) => dispatch(DBActions.getHourlyData(obj))
+        getHourlyData: (obj) => dispatch(DBActions.getHourlyData(obj)),
+        getWeeklyData: (date, branch) => dispatch(DBActions.getWeeklyData(date, branch)),
+        getRealTimeData:(date,branch)=> dispatch(DBActions.getRealTimeData(date,branch)),
     }
 }
 export default connect(mapStateToPorps, mapDispatchToPorps)(Home)

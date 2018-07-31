@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
-import { InputField, List } from './githubComponent';
 import { connect } from 'react-redux';
 import './App.css';
 import Navbar from './Component/Navbar';
