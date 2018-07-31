@@ -18,6 +18,7 @@ class Home extends Component {
 
     constructor(props) {
         super(props);
+        this.clicksObject = {};
         this.angryCount = 0;
         this.angryHourCount = [];
         this.moderateCount = 0;
@@ -31,10 +32,14 @@ class Home extends Component {
         this.angryWeekCountArray = [];
         this.happyWeekCountArray = [];
         this.moderatWeekCountArray = [];
-        this.iteration = 0
+        this.iteration = 0;
+
+        this.state = { countClicks: {}, angryCount: 0, happyCount: 0, moderateCount: 0, angryHourCountArray: [], moderateHourCountArray: [], happyHourCountArray: [], angryWeekCountArray: [], happyWeekCountArray: [], moderateWeekCountArray: [] }
     }
 
     componentDidMount() {
+        this.props.getHourlyData({ date: "31-07-2018", branch: "Tariq Road" })
+
         this.props.getRealtimeData('31-07-2018', 'Tariq Road');
         let date = this.getMonday('24,2018 july');
         let month = date.getMonth() + 1;
@@ -53,13 +58,58 @@ class Home extends Component {
             this.props.getWeeklyData(this.datesArray[i], 'Tariq Road');
         }
     }
-
+    shouldComponentUpdate(newProps, newState) {
+        console.log("***recv props****", newProps);
+        return true;
+    }
     componentWillReceiveProps(nextProps) {
         this.iteration++;
-        if (nextProps) {
+
+        if (nextProps.state) {
             if (this.iteration == 7) {
                 this.calculateResponsesWeeklyWise(nextProps.weeklyData);
+                this.calculateResponsesHourlyWise(nextProps.state.hourlyData);
+                this.dailyClicksCount(nextProps.state.hourlyData)
+                this.props.getHourlyDataFlagFalse();
             }
+            if (this.iteration > 7 && nextProps.hourlyDataFlag) {
+                console.log('****iteration****', this.iteration);
+                this.calculateResponsesHourlyWise(nextProps.state.hourlyData);
+                this.dailyClicksCount(nextProps.state.hourlyData)
+                this.props.getHourlyDataFlagFalse()
+            }
+        }
+    }
+    dailyClicksCount = (array) => {
+
+        if (array) {
+            array.forEach(data => {
+                if (data.userResponse == "satisfied") {
+                    if (this.clicksObject["happy"]) {
+                        this.clicksObject["happy"]++
+                    }
+                    else {
+                        this.clicksObject["happy"] = 1;
+                    }
+                }
+                if (data.userResponse == "angry") {
+                    if (this.clicksObject["angry"]) {
+                        this.clicksObject["angry"]++;
+                    }
+                    else {
+                        this.clicksObject["angry"] = 1
+                    }
+                }
+                if (data.userResponse == "moderat") {
+                    if (this.clicksObject["moderate"]) {
+                        this.clicksObject["moderate"]++;
+                    }
+                    else {
+                        this.clicksObject["moderate"] = 1;
+                    }
+                }
+            });
+            this.setState({ countClicks: this.clicksObject }, () => { this.clicksObject = {} })
         }
     }
     calculateResponsesWeeklyWise = (array) => {
@@ -94,6 +144,8 @@ class Home extends Component {
                     this.moderatWeekCountArray[weekDay] = this.moderateWeekCount;
                 }
             });
+            this.setState({ angryWeekCountArray: this.angryWeekCountArray, moderateWeekCountArray: this.moderatWeekCountArray, happyWeekCountArray: this.happyWeekCountArray }
+            )
         }
     }
     getMonday = (d) => {
@@ -136,7 +188,15 @@ class Home extends Component {
                     }
                     this.happyHourCount[timeHours] = this.happyCount
                 }
-            })
+                this.setState({ moderateHourCountArray: [...this.moderateHourCount], angryHourCountArray: [...this.angryHourCount], happyHourCountArray: [...this.happyHourCount] }, () => {
+                    this.angryCount = 0;
+                    this.happyCount = 0;
+                    this.moderateCount = 0;
+                    this.angryHourCount = [];
+                    this.moderateHourCount = [];
+                    this.happyHourCount = [];
+                })
+            });
         }
     }
     render() {
@@ -152,8 +212,8 @@ class Home extends Component {
                                         Happy Clicks
                                 </Typography>
                                     <Typography variant="display2" style={{ textAlign: "center" }} gutterBottom>
-                                        0
-                                </Typography>
+                                        {this.state.countClicks.happy}
+                                    </Typography>
                                 </div>
                             </CardContent>
 
@@ -168,8 +228,8 @@ class Home extends Component {
                                         Moderate Clicks
                         </Typography>
                                     <Typography variant="display2" style={{ textAlign: "center" }} gutterBottom>
-                                        0
-                        </Typography>
+                                        {this.state.countClicks.moderate}
+                                    </Typography>
                                 </div>
                             </CardContent>
 
@@ -184,33 +244,136 @@ class Home extends Component {
                                         Angry Clicks
                         </Typography>
                                     <Typography variant="display2" style={{ textAlign: "center" }} gutterBottom>
-                                        0
-                        </Typography>
+                                        {this.state.countClicks.angry}
+                                    </Typography>
                                 </div>
                             </CardContent>
 
                         </Card>
                     </Grid>
                 </Grid>
+
                 <Grid container justify='center' direction={'row'}>
                     <Grid item md={8} xs={10} style={{ padding: 15 }}>
                         <Card >
                             <CardContent style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                                <BarChart
+                                    heading={"Hourly Data"}
+                                    chartData={
+                                        {
+                                            labels: ["00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23"],
+                                            datasets: [
+                                                {
+                                                    label: 'Happy',
+                                                    data: this.state.happyHourCountArray,
 
+
+
+                                                    backgroundColor: "#4FAB56"
+                                                },
+                                                {
+                                                    label: 'Moderate',
+                                                    data: this.state.moderateHourCountArray,
+
+
+
+                                                    backgroundColor: '#F99D2C'
+                                                },
+                                                {
+                                                    label: 'sad',
+                                                    data: this.state.angryHourCountArray,
+
+
+
+                                                    backgroundColor: "#E83E3B"
+                                                }
+                                            ]
+                                        }}
+
+
+
+
+
+
+                                />
                             </CardContent>
                         </Card>
                     </Grid>
                     <Grid item md={4} xs={10} style={{ padding: 15 }}>
                         <Card >
                             <CardContent style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-                                <DoughnutChart />
+                                <DoughnutChart
+                                    chartData={
+                                        {
+                                            labels: ['Happy', 'Moderate', 'Angry'],
+                                            datasets: [
+                                                {
+                                                    label: 'Population',
+                                                    data: [
+                                                        this.state.countClicks.happy,
+                                                        this.state.countClicks.moderate,
+                                                        this.state.countClicks.angry,
+
+                                                    ],
+                                                    backgroundColor: [
+                                                        '#4FAB56',
+                                                        '#F99D2C',
+                                                        '#E83E3B'
+
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    }
+
+
+
+                                />
                             </CardContent>
                         </Card>
                     </Grid>
                 </Grid>
                 <Grid container justify='center' direction={'row'}>
                     <Grid item md={10} xs={10} style={{ padding: 15 }}>
-                        <BarChart />
+                        <BarChart
+                            heading={"Weekly Data"}
+                            chartData={
+                                {
+                                    labels: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+                                    datasets: [
+                                        {
+                                            label: 'Happy',
+                                            data: this.state.happyWeekCountArray,
+
+
+
+                                            backgroundColor: "gray"
+                                        },
+                                        {
+                                            label: 'Moderate',
+                                            data: this.state.moderateWeekCountArray,
+
+
+
+                                            backgroundColor: 'brown'
+                                        },
+                                        {
+                                            label: 'sad',
+                                            data: this.state.angryWeekCountArray,
+
+
+
+                                            backgroundColor: "yellow"
+                                        }
+                                    ]
+                                }}
+
+
+
+
+
+
+                        />
                     </Grid>
                 </Grid>
             </div>
@@ -226,17 +389,19 @@ Date.prototype.addDays = function (days) {
 
 
 const mapStateToPorps = (state) => {
-    
+
     return {
-        hourlyData: state.dbReducer.hourlyData,
+        state: state.dbReducer,
         weeklyData: state.dbReducer.weeklyData,
+        hourlyDataFlag: state.dbReducer.hourlyDataFlag
     }
 }
 const mapDispatchToPorps = (dispatch) => {
     return {
         getHourlyData: (obj) => dispatch(DBActions.getHourlyData(obj)),
         getWeeklyData: (date, branch) => dispatch(DBActions.getWeeklyData(date, branch)),
-        getRealtimeData: (date, branch) => dispatch(DBActions.getRealTimeData(date,branch))
+        getRealtimeData: (date, branch) => dispatch(DBActions.getRealTimeData(date, branch)),
+        getHourlyDataFlagFalse: () => dispatch(DBActions.getHourlyDataFlagFalse())
     }
 }
 export default connect(mapStateToPorps, mapDispatchToPorps)(Home);

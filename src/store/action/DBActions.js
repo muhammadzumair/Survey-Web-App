@@ -26,6 +26,11 @@ class DBActions{
         payload:array
     }
    }
+   static getHourlyDataFlagFalse(){
+       return{
+           type:actionTypes.GET_HOURLY_DATA_UPDATE_FLAG_FALSE
+       }
+   }
 }
 
 
