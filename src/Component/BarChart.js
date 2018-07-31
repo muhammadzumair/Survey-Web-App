@@ -47,7 +47,7 @@ export default class BarChart extends Component {
         return (
             <Bar
                 data={this.state.chartData}
-                height="500"
+                height={500}
                 options={
                     {
 

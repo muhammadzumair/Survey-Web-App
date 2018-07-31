@@ -10,7 +10,9 @@ const rootReducer = combineReducers({
 });
 
 export const rootEpic = combineEpics(
-    EpicActions.getHourlyData
+    EpicActions.getHourlyData,
+    EpicActions.getWeeklyData,
+    EpicActions.getRealtimeData,
 );
 
 const epicMiddleware = createEpicMiddleware(rootEpic);

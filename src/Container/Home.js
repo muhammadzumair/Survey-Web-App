@@ -10,7 +10,14 @@ import Divider from '@material-ui/core/Divider';
 import Typography from '@material-ui/core/Typography';
 import DoughnutChart from '../Component/DoughnutChart';
 import BarChart from '../Component/BarChart';
-import DBActions from '../store/action/DBActions'
+import DBActions from '../store/action/DBActions';
+import FirebaseDB from '../store/Firebase/firebaseDB';
+
+Date.prototype.addDays = function (days) {
+    var date = new Date(this.valueOf());
+    date.setDate(date.getDate() + days);
+    return date;
+}
 
 class Home extends Component {
 
@@ -22,19 +29,84 @@ class Home extends Component {
         this.moderateHourCount = [];
         this.happyCount = 0;
         this.happyHourCount = [];
+        this.datesArray = [];
+        this.angryWeekCount = 0;
+        this.happyWeekCount = 0;
+        this.moderatWeekCount = 0;
+        this.angryWeekCountArray = [];
+        this.happyWeekCountArray = [];
+        this.moderatWeekCountArray = [];
+        this.iteration = 0
     }
 
     componentDidMount() {
-        this.props.getHourlyData("24-07-2018", "Tariq Road");
-
-    }
-    componentWillReceiveProps(nextProps) {
-        if (nextProps) {
-            this.calculateResponsesHourlyWise(nextProps.hourlyData)
+        this.props.getRealtimeData('31-07-2018', 'Tariq Road');
+        let date = this.getMonday('24,2018 july');
+        let month = date.getMonth() + 1;
+        month = month.toString().length > 1 ? month : `0${month}`;
+        let fullDate = `${date.getDate()}-${month}-${date.getFullYear()}`;
+        this.datesArray[0] = fullDate;
+        for (let i = 1; i <= 6; i++) {
+            let date = this.getMonday('24,2018 july');
+            date = date.addDays(i);
+            let month = date.getMonth() + 1;
+            month = month.toString().length > 1 ? month : `0${month}`;
+            let fullDate = `${date.getDate()}-${month}-${date.getFullYear()}`;
+            this.datesArray.push(fullDate);
+        }
+        for (let i = 0; i < this.datesArray.length; i++) {
+            this.props.getWeeklyData(this.datesArray[i], 'Tariq Road');
         }
     }
+    componentWillReceiveProps(nextProps) {
+        this.iteration++;
+        if (nextProps) {
+            if (this.iteration == 7) {
+                this.calculateResponsesWeeklyWise(nextProps.weeklyData);
+            }
+        }
+    }
+    calculateResponsesWeeklyWise = (array) => {
+        if (array !== undefined) {
+            array.forEach((data, i) => {
+                let weekDay = new Date(data.timeStamp).getDay();
+                this.happyWeekCount = this.happyWeekCountArray[weekDay];
+                this.moderateWeekCount = this.moderatWeekCountArray[weekDay];
+                this.angryWeekCount = this.angryWeekCountArray[weekDay];
+                if (data.userResponse === 'satisfied') {
+                    if (this.happyWeekCount) {
+                        this.happyWeekCount++;
+                    } else {
+                        this.happyWeekCount = 1
+                    }
+                    this.happyWeekCountArray[weekDay] = this.happyWeekCount;
+                }
+                if (data.userResponse === 'angry') {
+                    if (this.angryWeekCount) {
+                        this.angryWeekCount++;
+                    } else {
+                        this.angryWeekCount = 1
+                    }
+                    this.angryWeekCountArray[weekDay] = this.angryWeekCount;
+                }
+                if (data.userResponse === 'moderat') {
+                    if (this.moderateWeekCount) {
+                        this.moderateWeekCount++;
+                    } else {
+                        this.moderateWeekCount = 1;
+                    }
+                    this.moderatWeekCountArray[weekDay] = this.moderateWeekCount;
+                }
+            });
+        }
+    }
+    getMonday = (d) => {
+        d = new Date(d);
+        var day = d.getDay(),
+            diff = d.getDate() - day + (day == 0 ? -6 : 1);
+        return new Date(d.setDate(diff));
+    }
     calculateResponsesHourlyWise = (array) => {
-        console.log("in function")
         if (array) {
             array.map(data => {
                 let timeHours = new Date(data.timeStamp).getHours();
@@ -43,45 +115,35 @@ class Home extends Component {
                 this.happyCount = this.happyHourCount[timeHours]
                 if (data.userResponse === "angry") {
                     if (this.angryCount) {
-
                         this.angryCount++;
-                        this.angryHourCount[timeHours] = this.angryCount
                     }
                     else {
                         this.angryCount = 1;
-                        this.angryHourCount[timeHours] = this.angryCount
                     }
+                    this.angryHourCount[timeHours] = this.angryCount
                 }
                 if (data.userResponse === "moderat") {
                     if (this.moderateCount) {
-
                         this.moderateCount++;
-                        this.moderateHourCount[timeHours] = this.moderateCount
                     }
                     else {
                         this.moderateCount = 1;
-                        this.moderateHourCount[timeHours] = this.moderateCount
-
                     }
+                    this.moderateHourCount[timeHours] = this.moderateCount
                 }
                 if (data.userResponse === "satisfied") {
                     if (this.happyCount) {
-
                         this.happyCount++
-                        this.happyHourCount[timeHours] = this.happyCount
                     }
                     else {
                         this.happyCount = 1
-                        this.happyHourCount[timeHours] = this.happyCount
                     }
+                    this.happyHourCount[timeHours] = this.happyCount
                 }
             })
-            console.log(this.happyHourCount, this.angryHourCount, this.moderateHourCount)
         }
     }
-
     render() {
-
         return (
             <div>
                 <Grid container direction={'row'} justify="center"  >
@@ -164,12 +226,15 @@ class Home extends Component {
 const mapStateToPorps = (state) => {
     console.log('state: ', state)
     return {
-        hourlyData: state.dbReducer.hourlyData
+        hourlyData: state.dbReducer.hourlyData,
+        weeklyData: state.dbReducer.weeklyData,
     }
 }
 const mapDispatchToPorps = (dispatch) => {
     return {
-        getHourlyData: (obj) => dispatch(DBActions.getHourlyData(obj))
+        getHourlyData: (obj) => dispatch(DBActions.getHourlyData(obj)),
+        getWeeklyData: (date, branch) => dispatch(DBActions.getWeeklyData(date, branch)),
+        getRealtimeData: (date, branch) => dispatch(DBActions.getRealtimeData(date,branch))
     }
 }
-export default connect(mapStateToPorps, mapDispatchToPorps)(Home)
+export default connect(mapStateToPorps, mapDispatchToPorps)(Home);

@@ -1,6 +1,4 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
-import { InputField, List } from './githubComponent';
 import { connect } from 'react-redux';
 import './App.css';
 import Navbar from './Component/Navbar';
@@ -9,11 +7,6 @@ class App extends Component {
     super(props);
     this.state = {
       userInput: ""
-    }
-  }
-  keyPress = (e) => {
-    if (e.key === "Enter") {
-      this.props.getUserData(this.state.userInput);
     }
   }
   render() {
