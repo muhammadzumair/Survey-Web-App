@@ -47,10 +47,8 @@ class Home extends Component {
         this.setState({ [event.target.name]: event.target.value });
         this.props.setCurrentBranch(event.target.value);
         this.iteration = 0;
-    };
-    componentDidMount() {
-        this.props.getHourlyData({ date: '31-07-2018', branch: 'Tariq Road' });
-        this.props.getRealtimeData('31-07-2018', 'Tariq Road');
+        this.props.getHourlyData({ date: this.props.state.currentDate, branch: event.target.value });
+        this.props.getRealtimeData(this.props.state.currentDate, event.target.value);
         let date = this.getMonday('24,2018 july');
         let month = date.getMonth() + 1;
         month = month.toString().length > 1 ? month : `0${month}`;
@@ -67,6 +65,8 @@ class Home extends Component {
         for (let i = 0; i < this.datesArray.length; i++) {
             this.props.getWeeklyData(this.datesArray[i], 'Tariq Road');
         }
+    };
+    componentDidMount() {
     }
     shouldComponentUpdate(newProps, newState) {
         console.log("***recv props****", newProps);
@@ -74,7 +74,7 @@ class Home extends Component {
     }
     componentWillReceiveProps(nextProps) {
         this.iteration++;
-        
+
         if (nextProps.state) {
             if (this.iteration == 7) {
                 this.calculateResponsesWeeklyWise(nextProps.state.weeklyData);
@@ -233,142 +233,162 @@ class Home extends Component {
     }
     render() {
         return (
-            <Navbar changeHandler={(event) => this.handleChange(event)} selectedBranch={this.state.selectedBranch}>
-                <Grid container direction={'row'} justify="center"  >
-                    <Grid item md={4} xs={10} style={{ padding: 15 }}  >
-                        <Card >
-                            <CardContent style={{ display: "flex", flexDirection: "row", justifyContent: "space-between" }} >
-                                <img src={require('./assets/happy.png')} height='125px' width='125px' />
-                                <div style={{ display: "flex", flexDirection: "column", justifyContent: "center" }} >
-                                    <Typography variant="caption" gutterBottom>
-                                        Happy Clicks
-                                </Typography>
-                                    <Typography variant="display2" style={{ textAlign: "center" }} gutterBottom>
-                                        {this.state.countClicks['happy']}
-                                    </Typography>
+            <div>
+                {
+
+                    <Navbar changeHandler={(event) => this.handleChange(event)} selectedBranch={this.state.selectedBranch}>
+                        {
+                            this.state.selectedBranch !== 'select branch' ?
+                                <div>
+                                    <Grid container direction={'row'} justify="center"  >
+                                        <Grid item md={4} xs={10} style={{ padding: 15 }}  >
+                                            <Card >
+                                                <CardContent style={{ display: "flex", flexDirection: "row", justifyContent: "space-between" }} >
+                                                    <img src={require('./assets/happy.png')} height='125px' width='125px' />
+                                                    <div style={{ display: "flex", flexDirection: "column", justifyContent: "center" }} >
+                                                        <Typography variant="caption" gutterBottom>
+                                                            Happy Clicks
+                                                        </Typography>
+                                                        <Typography variant="display2" style={{ textAlign: "center" }} gutterBottom>
+                                                            {this.state.countClicks['happy']}
+                                                        </Typography>
+                                                    </div>
+                                                </CardContent>
+
+                                            </Card>
+                                        </Grid>
+                                        <Grid item md={4} xs={10} style={{ padding: 15 }}>
+                                            <Card >
+                                                <CardContent style={{ display: "flex", flexDirection: "row", justifyContent: "space-between" }} >
+                                                    <img src={require('./assets/moderate.png')} height='125px' width='125px' />
+                                                    <div style={{ display: "flex", flexDirection: "column", justifyContent: "center" }} >
+                                                        <Typography variant="caption" gutterBottom>
+                                                            Moderate Clicks
+                                                        </Typography>
+                                                        <Typography variant="display2" style={{ textAlign: "center" }} gutterBottom>
+                                                            {this.state.countClicks['moderat']}
+                                                        </Typography>
+                                                    </div>
+                                                </CardContent>
+
+                                            </Card>
+                                        </Grid>
+                                        <Grid item md={4} xs={10} style={{ padding: 15 }}>
+                                            <Card >
+                                                <CardContent style={{ display: "flex", flexDirection: "row", justifyContent: "space-between" }} >
+                                                    <img src={require('./assets/__sad.png')} height='125px' width='125px' />
+                                                    <div style={{ display: "flex", flexDirection: "column", justifyContent: "center" }} >
+                                                        <Typography variant="caption" gutterBottom>
+                                                            Angry Clicks
+                                                        </Typography>
+                                                        <Typography variant="display2" style={{ textAlign: "center" }} gutterBottom>
+                                                            {this.state.countClicks['angry']}
+                                                        </Typography>
+                                                    </div>
+                                                </CardContent>
+
+                                            </Card>
+                                        </Grid>
+                                    </Grid>
+
+                                    <Grid container justify='center' direction={'row'}>
+                                        <Grid item md={8} xs={10} style={{ padding: 15 }}>
+                                            <Card >
+                                                <CardContent style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                                                    <BarChart
+                                                        chartData={{
+                                                            labels: ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'], //x-axis label array
+                                                            datasets: [
+                                                                {
+                                                                    label: 'Happy',
+                                                                    data: this.state.happyHourCountArray,
+                                                                    backgroundColor: "#4FAB56"
+                                                                },
+                                                                {
+                                                                    label: 'Moderate',
+                                                                    data: this.state.moderateHourCountArray,
+                                                                    backgroundColor: '#F99D2C'
+                                                                },
+                                                                {
+                                                                    label: 'Angry',
+                                                                    data: this.state.angryHourCountArray,
+                                                                    backgroundColor: "#E83E3B"
+                                                                }
+                                                            ]
+                                                        }}
+                                                    />
+                                                </CardContent>
+                                            </Card>
+                                        </Grid>
+                                        <Grid item md={4} xs={10} style={{ padding: 15 }}>
+                                            <Card >
+                                                <CardContent style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                                                    <DoughnutChart
+                                                        chartData={{
+                                                            labels: ['Happy', 'Moderate', 'Angry'],
+                                                            datasets: [
+                                                                {
+                                                                    label: 'Population',
+                                                                    data: [
+                                                                        this.state.countClicks['happy'],
+                                                                        this.state.countClicks['moderat'],
+                                                                        this.state.countClicks['angry']
+                                                                    ],
+                                                                    backgroundColor: [
+                                                                        '#4FAB56',
+                                                                        '#F99D2C',
+                                                                        '#E83E3B'
+
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        }}
+                                                    />
+                                                </CardContent>
+                                            </Card>
+                                        </Grid>
+                                    </Grid>
+                                    <Grid container justify='center' direction={'row'}>
+                                        <Grid item md={10} xs={10} style={{ padding: 15 }}>
+                                        <Card>
+                                            <CardContent>
+                                                <BarChart
+                                                    chartData={{
+                                                        labels: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], //x-axis label array
+                                                        datasets: [
+                                                            {
+                                                                label: 'Happy',
+                                                                data: this.state.happyWeekCountArray,
+                                                                backgroundColor: "#4FAB56"
+                                                            },
+                                                            {
+                                                                label: 'Moderate',
+                                                                data: this.state.moderatWeekCountArray,
+                                                                backgroundColor: '#F99D2C'
+                                                            },
+                                                            {
+                                                                label: 'Angry',
+                                                                data: this.state.angryWeekCountArray,
+                                                                backgroundColor: "#E83E3B"
+                                                            }
+                                                        ]
+                                                    }}
+                                                />
+                                            </CardContent>
+                                            </Card>
+                                        </Grid>
+                                    </Grid>
                                 </div>
-                            </CardContent>
-
-                        </Card>
-                    </Grid>
-                    <Grid item md={4} xs={10} style={{ padding: 15 }}>
-                        <Card >
-                            <CardContent style={{ display: "flex", flexDirection: "row", justifyContent: "space-between" }} >
-                                <img src={require('./assets/moderate.png')} height='125px' width='125px' />
-                                <div style={{ display: "flex", flexDirection: "column", justifyContent: "center" }} >
-                                    <Typography variant="caption" gutterBottom>
-                                        Moderate Clicks
-                                    </Typography>
-                                    <Typography variant="display2" style={{ textAlign: "center" }} gutterBottom>
-                                        {this.state.countClicks['moderat']}
-                                    </Typography>
+                                :
+                                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                    <h1>
+                                        Please Select Your Branch
+                                    </h1>
                                 </div>
-                            </CardContent>
-
-                        </Card>
-                    </Grid>
-                    <Grid item md={4} xs={10} style={{ padding: 15 }}>
-                        <Card >
-                            <CardContent style={{ display: "flex", flexDirection: "row", justifyContent: "space-between" }} >
-                                <img src={require('./assets/__sad.png')} height='125px' width='125px' />
-                                <div style={{ display: "flex", flexDirection: "column", justifyContent: "center" }} >
-                                    <Typography variant="caption" gutterBottom>
-                                        Angry Clicks
-                                    </Typography>
-                                    <Typography variant="display2" style={{ textAlign: "center" }} gutterBottom>
-                                        {this.state.countClicks['angry']}
-                                    </Typography>
-                                </div>
-                            </CardContent>
-
-                        </Card>
-                    </Grid>
-                </Grid>
-
-                <Grid container justify='center' direction={'row'}>
-                    <Grid item md={8} xs={10} style={{ padding: 15 }}>
-                        <Card >
-                            <CardContent style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-                                <BarChart
-                                    chartData={{
-                                        labels: ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'], //x-axis label array
-                                        datasets: [
-                                            {
-                                                label: 'Happy',
-                                                data: this.state.happyHourCountArray,
-                                                backgroundColor: "#4FAB56"
-                                            },
-                                            {
-                                                label: 'Moderate',
-                                                data: this.state.moderateHourCountArray,
-                                                backgroundColor: '#F99D2C'
-                                            },
-                                            {
-                                                label: 'Angry',
-                                                data: this.state.angryHourCountArray,
-                                                backgroundColor: "#E83E3B"
-                                            }
-                                        ]
-                                    }}
-                                />
-                            </CardContent>
-                        </Card>
-                    </Grid>
-                    <Grid item md={4} xs={10} style={{ padding: 15 }}>
-                        <Card >
-                            <CardContent style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-                                <DoughnutChart
-                                    chartData={{
-                                        labels: ['Happy', 'Moderate', 'Angry'],
-                                        datasets: [
-                                            {
-                                                label: 'Population',
-                                                data: [
-                                                    this.state.countClicks['happy'],
-                                                    this.state.countClicks['moderat'],
-                                                    this.state.countClicks['angry']
-                                                ],
-                                                backgroundColor: [
-                                                    '#4FAB56',
-                                                    '#F99D2C',
-                                                    '#E83E3B'
-
-                                                ]
-                                            }
-                                        ]
-                                    }}
-                                />
-                            </CardContent>
-                        </Card>
-                    </Grid>
-                </Grid>
-                <Grid container justify='center' direction={'row'}>
-                    <Grid item md={10} xs={10} style={{ padding: 15 }}>
-                        <BarChart
-                            chartData={{
-                                labels: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], //x-axis label array
-                                datasets: [
-                                    {
-                                        label: 'Happy',
-                                        data: this.state.happyWeekCountArray,
-                                        backgroundColor: "#4FAB56"
-                                    },
-                                    {
-                                        label: 'Moderate',
-                                        data: this.state.moderatWeekCountArray,
-                                        backgroundColor: '#F99D2C'
-                                    },
-                                    {
-                                        label: 'Angry',
-                                        data: this.state.angryWeekCountArray,
-                                        backgroundColor: "#E83E3B"
-                                    }
-                                ]
-                            }}
-                        />
-                    </Grid>
-                </Grid>
-            </Navbar>
+                        }
+                    </Navbar>
+                }
+            </div>
         )
     }
 
@@ -384,7 +404,6 @@ const mapStateToPorps = (state) => {
     console.log('newState: ', state);
     return {
         state: state.dbReducer,
-        iteration:state.dbReducer.iteration
     }
 }
 const mapDispatchToPorps = (dispatch) => {

@@ -5,7 +5,7 @@ import { Doughnut } from 'react-chartjs-2';
 export default class DoughnutChart extends Component {
   constructor(props) {
     super(props);
-    
+
 
   }
   render() {
