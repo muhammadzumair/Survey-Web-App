@@ -69,6 +69,22 @@ export default class FirebaseDB {
 
     }
 
+    static loadBranches() {
+        let array = []
+        Fire.firestore().collection("Locations").onSnapshot(function (snapshot) {
+            snapshot.docChanges().forEach(function (change) {
+                var item = change.doc.data();
+                item.key = change.doc.id;
+                array.push(item)
+                console.log('branches arrray form firebasedb: ', array);
+            });
+            store.dispatch({
+                type: actionType.LOAD_BRANCHES_SUCCEED,
+                payload: array,
+            });
+        })
+    }
+
 }
 
 

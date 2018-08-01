@@ -15,6 +15,7 @@ export const rootEpic = combineEpics(
     EpicActions.getHourlyData,
     EpicActions.getWeeklyData,
     EpicActions.getRealtimeData,
+    EpicActions.loadBraches
 );
 
 const epicMiddleware = createEpicMiddleware(rootEpic);

@@ -38,10 +38,16 @@ class Home extends Component {
             moderatWeekCountArray: [],
             iteration: 0,
             flag: true,
-            countClicks: {}
+            countClicks: {},
+            selectedBranch: 'select branch'
         }
     }
 
+    handleChange = event => {
+        this.setState({ [event.target.name]: event.target.value });
+        this.props.setCurrentBranch(event.target.value);
+        this.iteration = 0;
+    };
     componentDidMount() {
         this.props.getHourlyData({ date: '31-07-2018', branch: 'Tariq Road' });
         this.props.getRealtimeData('31-07-2018', 'Tariq Road');
@@ -226,7 +232,7 @@ class Home extends Component {
     }
     render() {
         return (
-            <Navbar>
+            <Navbar changeHandler={(event) => this.handleChange(event)} selectedBranch={this.state.selectedBranch}>
                 <Grid container direction={'row'} justify="center"  >
                     <Grid item md={4} xs={10} style={{ padding: 15 }}  >
                         <Card >
@@ -385,6 +391,7 @@ const mapDispatchToPorps = (dispatch) => {
         getWeeklyData: (date, branch) => dispatch(DBActions.getWeeklyData(date, branch)),
         getRealtimeData: (date, branch) => dispatch(DBActions.getRealTimeData(date, branch)),
         hourlyDataFlagFalse: () => dispatch(DBActions.hourlyDataFlagFalse()),
+        setCurrentBranch: (branch) => dispatch(DBActions.setCurrentBranch(branch))
     }
 }
 export default connect(mapStateToPorps, mapDispatchToPorps)(Home);

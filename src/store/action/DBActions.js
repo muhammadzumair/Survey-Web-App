@@ -7,7 +7,17 @@ class DBActions {
             type: actionTypes.GET_HOURLY_DATA_FLAG_FALSE
         }
     }
-
+    static setCurrentBranch(branch){
+        return{
+            type: actionTypes.SET_CURRENT_BRANCH,
+            payload: branch
+        }
+    }
+    static loadBraches(){
+        return{
+            type: actionTypes.LOAD_BRANCHES
+        }
+    }
     static getHourlyData(obj) {
         return {
             type: actionTypes.GET_HOURLY_DATA_PROGRESS,

@@ -5,6 +5,7 @@ import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 import Grid from "@material-ui/core/Grid";
+import DBActions from '../store/action/DBActions';
 
 const styles = {
     signInForm: {
@@ -37,6 +38,7 @@ class SignIn extends Component {
         console.log('this.props.history: /*/*/*/*/*/*/*/*/*/', this.props.history.location.pathname);
     };
     componentDidMount() {
+        this.props.loadBraches();
         // this.props.checkUser();
     }
     componentWillReceiveProps(nextProps) {
@@ -114,7 +116,7 @@ const mapStateToProps = state => {
 };
 const mapDispatchToProps = dispatch => {
     return {
-
+        loadBraches: () => dispatch(DBActions.loadBraches())
     };
 };
 export default connect(

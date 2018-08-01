@@ -52,5 +52,20 @@ export default class EpicActions {
                     })
             })
     }
+
+    static loadBraches(action$){
+        return action$.ofType(actionTypes.LOAD_BRANCHES)
+                .switchMap(()=>{
+                    return Observable.of(FirebaseDB.loadBranches())
+                        .map(data=>{
+                            return{
+                                type: null
+                            }
+                        })
+                        .catch(err=>{
+                            return Observable.of({type: actionTypes.LOAD_BRANCHES_FAIL, payload: err.message})
+                        })
+                })
+    }
 }
 

@@ -9,7 +9,6 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import Divider from '@material-ui/core/Divider';
 import Appbar from './Appbar';
-import Home from '../Container/Home'
 import './Navbar.css';
 
 const color = '#3f3f3f'
@@ -98,16 +97,8 @@ class Navbar extends Component {
           </List>
         </div>
         <div style={{ width: '75vw', marginLeft: '25vw', overflow: 'auto' }} className='col-2'>
-          <Appbar />
+          <Appbar changeHandler={(event)=>this.props.changeHandler(event)} selectedBranch={this.props.selectedBranch} />
           {this.props.children}
-          {/* {
-            this.props.history.location.pathname === '/home' ?
-              <Home />
-              :
-              null
-            // this.props.history.location.pathname === ''
-          } */}
-          {/* <Home/> */}
         </div>
 
       </div>

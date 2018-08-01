@@ -9,6 +9,8 @@ let intialState = {
     weeklyData: [],
     realTimeData: [],
     hourlyDataFlag: true,
+    branchesArray: [],
+    currentBranch: ''
 }
 
 function DBReducer(state = intialState, action) {
@@ -27,9 +29,9 @@ function DBReducer(state = intialState, action) {
 
         case actionTypes.MAKE_ISERROR_FALSE:
             return Object.assign({}, state, { isError: false });
-        
+
         case actionTypes.GET_HOURLY_DATA_UPDATE_FLAG_FALSE:
-        return Object.assign({},state,{hourlyDataFlag:false})
+            return Object.assign({}, state, { hourlyDataFlag: false })
 
 
 
@@ -49,6 +51,17 @@ function DBReducer(state = intialState, action) {
             return Object.assign({}, state, { isError: true, errorMessage: action.payload });
 
 
+
+
+        case actionTypes.LOAD_BRANCHES_SUCCEED:
+            return Object.assign({}, state, { branchesArray: action.payload });
+        case actionTypes.LOAD_BRANCHES_FAIL:
+            return Object.assign({}, state, { errorMessage: action.payload });
+
+
+
+        case actionTypes.SET_CURRENT_BRANCH:
+            return Object.assign({}, state, {currentBranch: action.payload});
         default:
             return state;
     }

@@ -3,19 +3,21 @@ import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
+import { connect } from 'react-redux';
+import { database } from "firebase";
 
 
-export default class Appbar extends Component {
+class Appbar extends Component {
   constructor(props) {
     super(props);
     this.state = {
       openDrawer: false,
+      selectedBranch: ''
     };
   }
   toggleDrawer = () => {
     this.setState({ openDrawer: !this.state.openDrawer });
   }
-
   render() {
     return (
       <div>
@@ -23,20 +25,43 @@ export default class Appbar extends Component {
           <Toolbar style={{ display: "flex", flex: 1, justifyContent: 'flex-end' }} >
             <div  >
               <Select
-                value={"select branch"}
-                onChange={this.handleChange}
+                name
+                value={this.props.selectedBranch}
+                onChange={(e) => this.props.changeHandler(e)}
+                inputProps={{
+                  name: 'selectedBranch',
+                }}
               >
                 <MenuItem value="select branch">
-                  <em>select branch</em>
+                  <em>Select Branch</em>
                 </MenuItem>
-                <MenuItem value={10}>Ten</MenuItem>
-                <MenuItem value={20}>Twenty</MenuItem>
-                <MenuItem value={30}>Thirty</MenuItem>
+                {
+                  this.props.state.branchesArray.map((data, i) => {
+                    console.log("daat/*/*/*/*/*/data: ", data);
+                    return <MenuItem value={data.key}>{data.key}</MenuItem>
+                  })
+                }
+                {/* <MenuItem value={20}></MenuItem>
+                <MenuItem value={30}>Thirty</MenuItem> */}
               </Select>
             </div>
           </Toolbar>
         </AppBar>
-      </div>
+      </div >
     );
   }
 }
+const mapDispatchToProps = dispatch => {
+  return {
+  };
+};
+const mapStateToProps = state => {
+  console.log('state from Appbar: ', state);
+  return {
+    state: state.dbReducer
+  }
+}
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Appbar);
