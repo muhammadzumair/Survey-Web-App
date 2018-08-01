@@ -13,6 +13,7 @@ export default class BarChart extends Component {
     
     render() {
         return (
+            
             <Bar
                 data={this.props.chartData}
                 height={350}
@@ -38,6 +39,7 @@ export default class BarChart extends Component {
 
                     }}
             />
+            
         )
     }
 }

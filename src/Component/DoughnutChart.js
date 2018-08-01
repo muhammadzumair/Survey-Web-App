@@ -16,7 +16,7 @@ export default class DoughnutChart extends Component {
         options={{
           title: {
             display: true,
-            text: 'this is heading',
+            text:this.props.heading,
             fontSize: 25
           },
           legend: {

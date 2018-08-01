@@ -10,7 +10,8 @@ let intialState = {
     realTimeData: [],
     hourlyDataFlag: true,
     iteration:0,
-    currentDate:null
+    currentDate:null,
+    branchesArray:[]
 }
 
 function DBReducer(state = intialState, action) {
