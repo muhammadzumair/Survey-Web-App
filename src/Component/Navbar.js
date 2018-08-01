@@ -43,11 +43,11 @@ class Navbar extends Component {
     }
   }
   componentWillReceiveProps(nextProps) {
-    
-    if (nextProps.user === null) {
-      
-      this.props.history.replace('/');
-    }
+    console.log(nextProps);
+    // if (nextProps.user === null) {
+
+    //   this.props.history.replace('/');
+    // }
   }
 
   clicked = (name) => {
@@ -97,10 +97,17 @@ class Navbar extends Component {
             </ListItem>
           </List>
         </div>
-        <div style={{ width: '75vw', marginLeft: '25vw', overflow: 'auto'}} className='col-2'>
+        <div style={{ width: '75vw', marginLeft: '25vw', overflow: 'auto' }} className='col-2'>
           <Appbar />
-          {/* {this.props.children} */}
-          <Home/>
+          {this.props.children}
+          {/* {
+            this.props.history.location.pathname === '/home' ?
+              <Home />
+              :
+              null
+            // this.props.history.location.pathname === ''
+          } */}
+          {/* <Home/> */}
         </div>
 
       </div>
@@ -108,7 +115,7 @@ class Navbar extends Component {
   }
 }
 const mapStateToProps = state => {
- 
+
   return {
     // user: state.AuthReducer.user,
     // isLoading: state.TableReducer.isLoading,

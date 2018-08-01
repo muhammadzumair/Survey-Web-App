@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-// import Navbar from "../../Component/Navbar";
+import Navbar from "../Component/Navbar";
 import Card from '@material-ui/core/Card';
 import { connect } from 'react-redux';
 import CardContent from '@material-ui/core/CardContent';
@@ -8,7 +8,6 @@ import Typography from '@material-ui/core/Typography';
 import DoughnutChart from '../Component/DoughnutChart';
 import BarChart from '../Component/BarChart';
 import DBActions from '../store/action/DBActions';
-import FirebaseDB from "../store/Firebase/firebaseDB";
 
 class Home extends Component {
 
@@ -227,7 +226,7 @@ class Home extends Component {
     }
     render() {
         return (
-            <div>
+            <Navbar>
                 <Grid container direction={'row'} justify="center"  >
                     <Grid item md={4} xs={10} style={{ padding: 15 }}  >
                         <Card >
@@ -362,7 +361,7 @@ class Home extends Component {
                         />
                     </Grid>
                 </Grid>
-            </div>
+            </Navbar>
         )
     }
 
