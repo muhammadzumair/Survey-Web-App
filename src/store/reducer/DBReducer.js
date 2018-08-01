@@ -9,6 +9,8 @@ let intialState = {
     weeklyData: [],
     realTimeData: [],
     hourlyDataFlag: true,
+    iteration:0,
+    currentDate:null
 }
 
 function DBReducer(state = intialState, action) {
@@ -47,6 +49,21 @@ function DBReducer(state = intialState, action) {
             return Object.assign({}, state, { realTimeData: action.payload });
         case actionTypes.GET_REALTIME_DATA_FAIL:
             return Object.assign({}, state, { isError: true, errorMessage: action.payload });
+
+
+
+        case actionTypes.INCREMENT_ITERATION:
+            return Object.assign({},state,{iteration:state.iteration++});
+        case actionTypes.RESET_ITERATION:
+        return Object.assign({},state,{iteration:0});
+
+
+        case actionTypes.GET_CURRENT_DATE_PROGRESS:
+        return Object.assign({},state,{isProgress:true});
+        case actionTypes.GET_CURRENT_DATE_SUCCEED:
+        return Object.assign({},state,{isProgress:false,currentDate:action.payload});
+        case actionTypes.GET_CURRENT_DATE_FAIL:
+        return Object.assign({},state,{isProgress:false,isError:true,errorMessage:action.payload})
 
 
         default:

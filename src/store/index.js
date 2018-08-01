@@ -20,7 +20,8 @@ export const rootEpic = combineEpics(
     EpicActions.getRealtimeData,
     AuthEpic.signInUserFromFirebase,
     AuthEpic.singOutUserFromFirebase,
-    AuthEpic.authStateChanged
+    AuthEpic.authStateChanged,
+    EpicActions.getCurrentDate
 );
 
 const epicMiddleware = createEpicMiddleware(rootEpic);

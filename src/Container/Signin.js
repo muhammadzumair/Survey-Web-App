@@ -5,6 +5,8 @@ import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 import Grid from "@material-ui/core/Grid";
+import AuthActions from '../store/action/AuthActions'
+import DBActions from "../store/action/DBActions";
 
 const styles = {
     signInForm: {
@@ -27,26 +29,24 @@ class SignIn extends Component {
         this.setState({ [event.target.name]: event.target.value });
     };
     signInHandler = () => {
-        // let userInfo = {
-        //   email: this.state.emailInput,
-        //   pass: this.state.passInput
-        // };
-        // console.log(userInfo);
-        // this.props.signInUser(userInfo);
-        this.props.history.replace('/home');
-        console.log('this.props.history: /*/*/*/*/*/*/*/*/*/', this.props.history.location.pathname);
+        let userInfo = {
+          email: this.state.emailInput,
+          pass: this.state.passInput
+        };
+        console.log(userInfo);
+        this.props.signInUser(userInfo);
+        
     };
     componentDidMount() {
-        // this.props.checkUser();
+        this.props.getCurrentDate()
+        this.props.checkUser();
     }
     componentWillReceiveProps(nextProps) {
         if (nextProps.user) {
-            // this.props.history.replace("/home");
-            // console.log("auth completed")
+            this.props.history.replace("/home");
+           
         }
-        if (nextProps.isError) {
-            // this.modalHandler(true);
-        }
+        
 
     }
 
@@ -106,15 +106,18 @@ class SignIn extends Component {
 const mapStateToProps = state => {
     console.log(state);
     return {
-        // user: state.AuthReducer.user,
-        // isLoading: state.AuthReducer.isLoading,
-        // isError: state.AuthReducer.isError,
-        // errorMsg: state.AuthReducer.errorMsg
+        user: state.authReducer.user,
+        isLoading: state.authReducer.isLoading,
+        isError: state.authReducer.isError,
+        errorMsg: state.authReducer.errorMessage,
+
     };
 };
 const mapDispatchToProps = dispatch => {
     return {
-
+        signInUser:(obj)=>dispatch(AuthActions.SignInUser(obj)),
+        checkUser:()=>dispatch(AuthActions.checkUser()),
+        getCurrentDate:()=>dispatch(DBActions.getCurrentDate())
     };
 };
 export default connect(

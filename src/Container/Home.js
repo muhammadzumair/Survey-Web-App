@@ -68,6 +68,7 @@ class Home extends Component {
     }
     componentWillReceiveProps(nextProps) {
         this.iteration++;
+        
         if (nextProps.state) {
             if (this.iteration == 7) {
                 this.calculateResponsesWeeklyWise(nextProps.state.weeklyData);
@@ -377,6 +378,7 @@ const mapStateToPorps = (state) => {
     console.log('newState: ', state);
     return {
         state: state.dbReducer,
+        iteration:state.dbReducer.iteration
     }
 }
 const mapDispatchToPorps = (dispatch) => {
@@ -385,6 +387,9 @@ const mapDispatchToPorps = (dispatch) => {
         getWeeklyData: (date, branch) => dispatch(DBActions.getWeeklyData(date, branch)),
         getRealtimeData: (date, branch) => dispatch(DBActions.getRealTimeData(date, branch)),
         hourlyDataFlagFalse: () => dispatch(DBActions.hourlyDataFlagFalse()),
+        incrementIteration:()=>dispatch(DBActions.incrementIteration()),
+        resetIteration:()=>dispatch(DBActions.resetIteration()),
+        
     }
 }
 export default connect(mapStateToPorps, mapDispatchToPorps)(Home);
