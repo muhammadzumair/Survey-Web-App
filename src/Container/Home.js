@@ -63,7 +63,10 @@ class Home extends Component {
             this.props.getWeeklyData(this.datesArray[i], 'Tariq Road');
         }
     }
-
+    shouldComponentUpdate(newProps, newState) {
+        console.log("***recv props****", newProps);
+        return true;
+    }
     componentWillReceiveProps(nextProps) {
         this.iteration++;
         if (nextProps.state) {
@@ -275,6 +278,7 @@ class Home extends Component {
                         </Card>
                     </Grid>
                 </Grid>
+
                 <Grid container justify='center' direction={'row'}>
                     <Grid item md={8} xs={10} style={{ padding: 15 }}>
                         <Card >

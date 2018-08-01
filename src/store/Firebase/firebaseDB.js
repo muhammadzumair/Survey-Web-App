@@ -43,6 +43,7 @@ export default class FirebaseDB {
         })
             ;
     }
+
     static getWeeklyData(date, branch) {
         return new Promise((res, rej) => {
             Fire.firestore().collection('Response').doc(branch).collection(date).get()

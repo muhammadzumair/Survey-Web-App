@@ -41,7 +41,7 @@ export default class EpicActions {
     static getRealtimeData(action$) {
         return action$.ofType(actionTypes.GET_REALTIME_DATA)
             .switchMap(({ payload }) => {
-                return Observable.of(FirebaseDB.getRealtimeData(payload.date, payload.branch))
+                return Observable.of(FirebaseDB.getRealTimeData(payload.date, payload.branch))
                     .map(data => {
                         return {
                             type:null,
