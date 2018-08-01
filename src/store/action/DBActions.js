@@ -42,6 +42,21 @@ class DBActions {
             payload: array
         }
     }
+    static incrementIteration(){
+        return {
+            type:actionTypes.INCREMENT_ITERATION
+        }
+    }
+    static resetIteration(){
+        return{
+            type:actionTypes.RESET_ITERATION
+        }
+    }
+    static getCurrentDate(){
+        return {
+            type:actionTypes.GET_CURRENT_DATE_PROGRESS
+        }
+    }
 }
 
 

@@ -3,6 +3,7 @@ import 'rxjs/add/operator/switchMap';
 import actionTypes from '../actionTypes';
 import FirebaseDB from '../Firebase/firebaseDB';
 import { ActionsObservable } from 'redux-observable';
+import DBActions from '../action/DBActions';
 
 export default class EpicActions {
 
@@ -44,7 +45,7 @@ export default class EpicActions {
                 return Observable.of(FirebaseDB.getRealTimeData(payload.date, payload.branch))
                     .map(data => {
                         return {
-                            type:null,
+                            type: null,
                         }
                     })
                     .catch(err => {
@@ -53,19 +54,47 @@ export default class EpicActions {
             })
     }
 
-    static loadBraches(action$){
+    static loadBraches(action$) {
         return action$.ofType(actionTypes.LOAD_BRANCHES)
-                .switchMap(()=>{
-                    return Observable.of(FirebaseDB.loadBranches())
-                        .map(data=>{
-                            return{
-                                type: null
-                            }
-                        })
-                        .catch(err=>{
-                            return Observable.of({type: actionTypes.LOAD_BRANCHES_FAIL, payload: err.message})
-                        })
+            .switchMap(() => {
+                return Observable.of(FirebaseDB.loadBranches())
+                    .map(data => {
+                        return {
+                            type: null
+                        }
+                    })
+                    .catch(err => {
+                        return Observable.of({ type: actionTypes.LOAD_BRANCHES_FAIL, payload: err.message })
+                    })
+            })
+    }
+    static getCurrentDate(action$) {
+        return action$.ofType(actionTypes.GET_CURRENT_DATE_PROGRESS).switchMap(() => {
+            return Observable.ajax({
+                url: "http://api.timezonedb.com/v2/get-time-zone?key=FJFC17ZZIX4V&format=json&by=zone&zone=Asia/Karachi",
+                method: 'GET',
+                async: true,
+                crossDomain: true,
+                responseType: 'json',
+                createXHR: () => new XMLHttpRequest()
+            })
+                .pluck("response").map(data => {
+                    return {
+                        type: actionTypes.GET_CURRENT_DATE_SUCCEED,
+                        payload: dateConvertor(data.formatted)
+                    }
+                }).catch(err => {
+                    return Observable.of({ type: actionTypes.GET_CURRENT_DATE_FAIL, payload: err.message })
                 })
+        })
     }
 }
+function dateConvertor(dateFromServer) {
+    let str = dateFromServer;
+    let res = str.slice(0, 11);
+    let year = res.slice(0, 4);
+    let month = res.slice(5, 7)
+    let day = res.slice(8, 10);
 
+    return day + "-" + month + "-" + year
+}
