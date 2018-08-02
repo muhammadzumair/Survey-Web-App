@@ -26,8 +26,9 @@ class Home extends Component {
         this.angryWeekCount = 0;
         this.happyWeekCount = 0;
         this.moderatWeekCount = 0;
-        this.iteration = 0,
-            this.clicksObject = {};
+        this.iteration = 0;
+        this.clicksObject = {};
+
 
         this.state = {
             angryHourCountArray: [],
@@ -43,25 +44,34 @@ class Home extends Component {
         }
     }
 
+    dateFormatter = (date) => {
+        let month = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'June', 'July', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            formatedDate = `${date.slice(0, 2)},${month[Number(date.slice(3, 5)) - 1]} ${date.slice(6, 10)}`;
+        return formatedDate;
+    }
+
     handleChange = event => {
         this.setState({ [event.target.name]: event.target.value });
         this.props.setCurrentBranch(event.target.value);
         this.iteration = 0;
         this.props.getHourlyData({ date: this.props.state.currentDate, branch: event.target.value });
         this.props.getRealtimeData(this.props.state.currentDate, event.target.value);
-        let date = this.getMonday('24,2018 july');
+        let date = this.getMonday(this.dateFormatter(this.props.state.currentDate));
         let month = date.getMonth() + 1;
         month = month.toString().length > 1 ? month : `0${month}`;
-        let fullDate = `${date.getDate()}-${month}-${date.getFullYear()}`;
+        let day = date.getDate().toString().length === 1 ? ('0' + date.getDate().toString()) : date.getDate();
+        let fullDate = `${day}-${month}-${date.getFullYear()}`;
         this.datesArray[0] = fullDate;
         for (let i = 1; i <= 6; i++) {
-            let date = this.getMonday('24,2018 july');
+            let date = this.getMonday(this.dateFormatter(this.props.state.currentDate));
             date = date.addDays(i);
+            let day = date.getDate().toString().length === 1 ? ('0' + date.getDate().toString()) : date.getDate();
             let month = date.getMonth() + 1;
             month = month.toString().length > 1 ? month : `0${month}`;
-            let fullDate = `${date.getDate()}-${month}-${date.getFullYear()}`;
+            let fullDate = `${day}-${month}-${date.getFullYear()}`;
             this.datesArray.push(fullDate);
         }
+        console.log('Dates ArraysDDDDDDDDDDDDDDDDDDDDDDDDDDDD: ', this.datesArray);
         for (let i = 0; i < this.datesArray.length; i++) {
             this.props.getWeeklyData(this.datesArray[i], 'Tariq Road');
         }
@@ -350,31 +360,31 @@ class Home extends Component {
                                     </Grid>
                                     <Grid container justify='center' direction={'row'}>
                                         <Grid item md={10} xs={10} style={{ padding: 15 }}>
-                                        <Card>
-                                            <CardContent>
-                                                <BarChart
-                                                    chartData={{
-                                                        labels: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], //x-axis label array
-                                                        datasets: [
-                                                            {
-                                                                label: 'Happy',
-                                                                data: this.state.happyWeekCountArray,
-                                                                backgroundColor: "#4FAB56"
-                                                            },
-                                                            {
-                                                                label: 'Moderate',
-                                                                data: this.state.moderatWeekCountArray,
-                                                                backgroundColor: '#F99D2C'
-                                                            },
-                                                            {
-                                                                label: 'Angry',
-                                                                data: this.state.angryWeekCountArray,
-                                                                backgroundColor: "#E83E3B"
-                                                            }
-                                                        ]
-                                                    }}
-                                                />
-                                            </CardContent>
+                                            <Card>
+                                                <CardContent>
+                                                    <BarChart
+                                                        chartData={{
+                                                            labels: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], //x-axis label array
+                                                            datasets: [
+                                                                {
+                                                                    label: 'Happy',
+                                                                    data: this.state.happyWeekCountArray,
+                                                                    backgroundColor: "#4FAB56"
+                                                                },
+                                                                {
+                                                                    label: 'Moderate',
+                                                                    data: this.state.moderatWeekCountArray,
+                                                                    backgroundColor: '#F99D2C'
+                                                                },
+                                                                {
+                                                                    label: 'Angry',
+                                                                    data: this.state.angryWeekCountArray,
+                                                                    backgroundColor: "#E83E3B"
+                                                                }
+                                                            ]
+                                                        }}
+                                                    />
+                                                </CardContent>
                                             </Card>
                                         </Grid>
                                     </Grid>

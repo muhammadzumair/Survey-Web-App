@@ -37,12 +37,9 @@ class Appbar extends Component {
                 </MenuItem>
                 {
                   this.props.state.branchesArray.map((data, i) => {
-                    console.log("daat/*/*/*/*/*/data: ", data);
-                    return <MenuItem value={data.key}>{data.key}</MenuItem>
+                    return <MenuItem key={i} value={data.key}>{data.key}</MenuItem>
                   })
                 }
-                {/* <MenuItem value={20}></MenuItem>
-                <MenuItem value={30}>Thirty</MenuItem> */}
               </Select>
             </div>
           </Toolbar>
