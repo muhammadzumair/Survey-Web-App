@@ -49,22 +49,26 @@ class Home extends Component {
         this.iteration = 0;
         this.props.getHourlyData({ date: this.props.currentDate, branch: event.target.value });
         this.props.getRealtimeData(this.props.currentDate, event.target.value);
-        let date = this.getMonday('24,2018 july');
+        let date = this.getMonday(this.dateFormatter(this.props.currentDate));
         let month = date.getMonth() + 1;
         month = month.toString().length > 1 ? month : `0${month}`;
-        let fullDate = `${date.getDate()}-${month}-${date.getFullYear()}`;
+        let day = date.getDate().toString().length == 1 ? `0${date.getDate()}` : date.getDate()
+        let fullDate = `${day}-${month}-${date.getFullYear()}`;
         this.datesArray[0] = fullDate;
         for (let i = 1; i <= 6; i++) {
-            let date = this.getMonday('24,2018 july');
+            let date = this.getMonday(this.dateFormatter(this.props.currentDate));
             date = date.addDays(i);
             let month = date.getMonth() + 1;
             month = month.toString().length > 1 ? month : `0${month}`;
-            let fullDate = `${date.getDate()}-${month}-${date.getFullYear()}`;
+            let day = date.getDate().toString().length == 1 ? `0${date.getDate()}` : date.getDate()
+            let fullDate = `${day}-${month}-${date.getFullYear()}`;
             this.datesArray.push(fullDate);
+
         }
         for (let i = 0; i < this.datesArray.length; i++) {
             this.props.getWeeklyData(this.datesArray[i], 'Tariq Road');
         }
+        console.log("///////dates array //////", this.datesArray)
     };
     componentDidMount() {
 
@@ -89,6 +93,13 @@ class Home extends Component {
                 this.props.hourlyDataFlagFalse();
             }
         }
+    }
+    dateFormatter = (date) => {
+        let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        let day = date.slice(0, 2);
+        let month = date.slice(3, 5)
+        let year = date.slice(6, 11);
+        return `${day},${months[Number(month - 1)]} ${year}`;
     }
     dailyClicksCount = (array) => {
         if (array) {
@@ -238,7 +249,7 @@ class Home extends Component {
 
                 {
                     this.state.selectedBranch === "select branch" ? <div><h1>Please Select Your Branch</h1></div> :
-                        <div style={{backgroundColor:"#f5f5f5"}} >
+                        <div style={{ backgroundColor: "#f5f5f5" }} >
                             <Grid container direction={'row'} justify="center"  >
                                 <Grid item md={4} xs={10} style={{ padding: 15 }}  >
                                     <Card >
@@ -323,7 +334,7 @@ class Home extends Component {
                                     <Card >
                                         <CardContent style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
                                             <DoughnutChart
-                                            heading={"Clicks Response"}
+                                                heading={"Clicks Response"}
                                                 chartData={{
                                                     labels: ['Happy', 'Moderate', 'Angry'],
                                                     datasets: [
