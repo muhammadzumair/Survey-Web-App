@@ -72,10 +72,10 @@ class Home extends Component {
             this.datesArray.push(fullDate);
 
         }
-        console.log('Dates ArraysDDDDDDDDDDDDDDDDDDDDDDDDDDDD: ', this.datesArray);
         for (let i = 0; i < this.datesArray.length; i++) {
-            this.props.getWeeklyData(this.datesArray[i], 'Tariq Road');
+            this.props.getWeeklyData(this.datesArray[i], event.target.value);
         }
+        this.datesArray = [];
     };
     componentDidMount() {
     }
@@ -88,10 +88,10 @@ class Home extends Component {
 
         if (nextProps.state) {
             if (this.iteration == 7) {
-                this.calculateResponsesWeeklyWise(nextProps.state.weeklyData);
                 this.calculateResponsesHourlyWise(nextProps.state.hourlyData);
                 this.dailyClicksCount(nextProps.state.hourlyData);
                 this.props.hourlyDataFlagFalse();
+                this.calculateResponsesWeeklyWise(nextProps.state.weeklyData);
             }
             if (this.iteration > 7 && nextProps.state.hourlyDataFlag) {
                 this.calculateResponsesHourlyWise(nextProps.state.hourlyData);

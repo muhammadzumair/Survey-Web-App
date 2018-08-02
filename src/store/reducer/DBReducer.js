@@ -63,7 +63,7 @@ function DBReducer(state = intialState, action) {
 
 
         case actionTypes.SET_CURRENT_BRANCH:
-            return Object.assign({}, state, {currentBranch: action.payload});
+            return Object.assign({}, state, {currentBranch: action.payload, weeklyData: []});
         case actionTypes.INCREMENT_ITERATION:
             return Object.assign({},state,{iteration:state.iteration++});
         case actionTypes.RESET_ITERATION:
