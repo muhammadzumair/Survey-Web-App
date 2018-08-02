@@ -8,6 +8,7 @@ let intialState = {
     hourlyData: [],
     weeklyData: [],
     realTimeData: [],
+    branchesArray: [],
     hourlyDataFlag: true,
     iteration:0,
     currentDate:null,

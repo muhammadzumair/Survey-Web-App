@@ -26,8 +26,9 @@ class Home extends Component {
         this.angryWeekCount = 0;
         this.happyWeekCount = 0;
         this.moderatWeekCount = 0;
-        this.iteration = 0,
-            this.clicksObject = {};
+        this.iteration = 0;
+        this.clicksObject = {};
+
 
         this.state = {
             angryHourCountArray: [],
@@ -41,6 +42,12 @@ class Home extends Component {
             countClicks: {},
             selectedBranch: 'select branch'
         }
+    }
+
+    dateFormatter = (date) => {
+        let month = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'June', 'July', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            formatedDate = `${date.slice(0, 2)},${month[Number(date.slice(3, 5)) - 1]} ${date.slice(6, 10)}`;
+        return formatedDate;
     }
 
     handleChange = event => {
@@ -58,20 +65,19 @@ class Home extends Component {
         for (let i = 1; i <= 6; i++) {
             let date = this.getMonday(this.dateFormatter(this.props.currentDate));
             date = date.addDays(i);
+            let day = date.getDate().toString().length === 1 ? ('0' + date.getDate().toString()) : date.getDate();
             let month = date.getMonth() + 1;
             month = month.toString().length > 1 ? month : `0${month}`;
-            let day = date.getDate().toString().length == 1 ? `0${date.getDate()}` : date.getDate()
             let fullDate = `${day}-${month}-${date.getFullYear()}`;
             this.datesArray.push(fullDate);
 
         }
+        console.log('Dates ArraysDDDDDDDDDDDDDDDDDDDDDDDDDDDD: ', this.datesArray);
         for (let i = 0; i < this.datesArray.length; i++) {
             this.props.getWeeklyData(this.datesArray[i], 'Tariq Road');
         }
-        console.log("///////dates array //////", this.datesArray)
     };
     componentDidMount() {
-
     }
     shouldComponentUpdate(newProps, newState) {
         console.log("***recv props****", newProps);
@@ -94,13 +100,13 @@ class Home extends Component {
             }
         }
     }
-    dateFormatter = (date) => {
-        let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-        let day = date.slice(0, 2);
-        let month = date.slice(3, 5)
-        let year = date.slice(6, 11);
-        return `${day},${months[Number(month - 1)]} ${year}`;
-    }
+    // dateFormatter = (date) => {
+    //     let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    //     let day = date.slice(0, 2);
+    //     let month = date.slice(3, 5)
+    //     let year = date.slice(6, 11);
+    //     return `${day},${months[Number(month - 1)]} ${year}`;
+    // }
     dailyClicksCount = (array) => {
         if (array) {
             array.forEach((data, i) => {
