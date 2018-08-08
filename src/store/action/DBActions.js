@@ -2,6 +2,25 @@ import actionTypes from '../actionTypes';
 
 
 class DBActions {
+    static getDataDateWise(date, branch){
+        return{
+            type: actionTypes.GET_DATA_DATE_WISE_PROGRESS,
+            payload: {date,branch}
+        }
+    }
+
+    static clearMonthlyArray(){
+        return{
+            type: actionTypes.CLEAR_MONTHLY_ARRAY
+        }
+    }
+    
+    static clearWeeklyArray(){
+        return{
+            type: actionTypes.CLEAR_WEEKLY_ARRAY
+        }
+    }
+
     static hourlyDataFlagFalse() {
         return {
             type: actionTypes.GET_HOURLY_DATA_FLAG_FALSE

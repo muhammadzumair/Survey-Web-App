@@ -56,6 +56,21 @@ export default class FirebaseDB {
         })
     }
 
+    static getDataDateWise(date, branch){
+        console.log('before request: ');
+        return new Promise((res, rej)=>{
+            Fire.firestore().collection('Response').doc(branch).collection(date).get()
+                .then(date => {
+                    console.log('after request: ');
+                    console.log('data come from firestore');
+                    res(snapshotToArray(date));
+                })
+                .catch(err=>{
+                    rej(err);
+                })
+        })
+    }
+
     static getRealTimeData(date, branch) {
         let array = [];
         Fire.firestore().collection("Response").doc(branch).collection(date).onSnapshot(function (snapshot) {

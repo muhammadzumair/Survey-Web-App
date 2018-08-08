@@ -10,9 +10,12 @@ let intialState = {
     realTimeData: [],
     branchesArray: [],
     hourlyDataFlag: true,
-    iteration:0,
-    currentDate:null,
-    branchesArray:[]
+    iteration: 0,
+    currentDate: null,
+    branchesArray: [],
+    isProgressGetDataDateWise: false,
+    dateWiseDataArray: [],
+    isErrorGetDataDateWise: false,
 }
 
 function DBReducer(state = intialState, action) {
@@ -30,7 +33,7 @@ function DBReducer(state = intialState, action) {
 
 
         case actionTypes.MAKE_ISERROR_FALSE:
-            return Object.assign({}, state, { isError: false });
+            return Object.assign({}, state, { isError: false, isErrorGetDataDateWise: false });
 
         case actionTypes.GET_HOURLY_DATA_UPDATE_FLAG_FALSE:
             return Object.assign({}, state, { hourlyDataFlag: false })
@@ -63,20 +66,35 @@ function DBReducer(state = intialState, action) {
 
 
         case actionTypes.SET_CURRENT_BRANCH:
-            return Object.assign({}, state, {currentBranch: action.payload, weeklyData: []});
+            return Object.assign({}, state, { currentBranch: action.payload, weeklyData: [] });
         case actionTypes.INCREMENT_ITERATION:
-            return Object.assign({},state,{iteration:state.iteration++});
+            return Object.assign({}, state, { iteration: state.iteration++ });
         case actionTypes.RESET_ITERATION:
-        return Object.assign({},state,{iteration:0});
+            return Object.assign({}, state, { iteration: 0 });
 
 
         case actionTypes.GET_CURRENT_DATE_PROGRESS:
-        return Object.assign({},state,{isProgress:true});
+            return Object.assign({}, state, { isProgress: true });
         case actionTypes.GET_CURRENT_DATE_SUCCEED:
-        return Object.assign({},state,{isProgress:false,currentDate:action.payload});
+            return Object.assign({}, state, { isProgress: false, currentDate: action.payload });
         case actionTypes.GET_CURRENT_DATE_FAIL:
-        return Object.assign({},state,{isProgress:false,isError:true,errorMessage:action.payload})
+            return Object.assign({}, state, { isProgress: false, isError: true, errorMessage: action.payload })
 
+        //clear Array to prevent data doubling
+        case actionTypes.CLEAR_MONTHLY_ARRAY:
+            return Object.assign({}, state, {dateWiseDataArray: []});
+        case actionTypes.CLEAR_WEEKLY_ARRAY:
+            return Object.assign({}, state, {weeklyData:[]});
+
+
+
+        case actionTypes.GET_DATA_DATE_WISE_PROGRESS:
+            return Object.assign({}, state, {isProgressGetDataDateWise: true});
+        case actionTypes.GET_DATA_DATE_WISE_SUCCEED:
+            console.log('request succeed: ', action.payload);
+            return Object.assign({}, state, {isProgressGetDataDateWise: false, dateWiseDataArray: [...state.dateWiseDataArray, ...action.payload]});
+        case actionTypes.GET_DATA_DATE_WISE_FAIL:
+            return Object.assign({}, state, {isProgressGetDataDateWise: false, isErrorGetDataDateWise: true, errorMessage: action.payload});
 
         default:
             return state;
