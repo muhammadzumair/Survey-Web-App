@@ -7,14 +7,14 @@ class DBActions {
             type: actionTypes.GET_HOURLY_DATA_FLAG_FALSE
         }
     }
-    static setCurrentBranch(branch){
-        return{
+    static setCurrentBranch(branch) {
+        return {
             type: actionTypes.SET_CURRENT_BRANCH,
             payload: branch
         }
     }
-    static loadBraches(){
-        return{
+    static loadBraches() {
+        return {
             type: actionTypes.LOAD_BRANCHES
         }
     }
@@ -42,19 +42,35 @@ class DBActions {
             payload: array
         }
     }
-    static incrementIteration(){
+    static incrementIteration() {
         return {
-            type:actionTypes.INCREMENT_ITERATION
+            type: actionTypes.INCREMENT_ITERATION
         }
     }
-    static resetIteration(){
+    static resetIteration() {
+        return {
+            type: actionTypes.RESET_ITERATION
+        }
+    }
+    static getCurrentDate() {
+        return {
+            type: actionTypes.GET_CURRENT_DATE_PROGRESS
+        }
+    }
+    static getMonthlyData(date, branch) {
+        return {
+            type: actionTypes.GET_MONTHLY_DATA_PROGRESS,
+            payload: { date, branch }
+        }
+    }
+    static clearMonthlyArray(){
         return{
-            type:actionTypes.RESET_ITERATION
+            type:actionTypes.CLEAR_MONTHLY_ARRAY
         }
     }
-    static getCurrentDate(){
-        return {
-            type:actionTypes.GET_CURRENT_DATE_PROGRESS
+    static clearWeeklyArray(){
+        return{
+            type:actionTypes.CLEAR_WEEKLY_ARRAY
         }
     }
 }

@@ -8,6 +8,10 @@ import Typography from '@material-ui/core/Typography';
 import DoughnutChart from '../Component/DoughnutChart';
 import BarChart from '../Component/BarChart';
 import DBActions from '../store/action/DBActions';
+import MenuItem from "@material-ui/core/MenuItem/MenuItem";
+import TextField from '@material-ui/core/TextField';
+import { concat } from "rxjs/observable/concat";
+
 
 class Home extends Component {
 
@@ -28,6 +32,13 @@ class Home extends Component {
         this.moderatWeekCount = 0;
         this.iteration = 0;
         this.clicksObject = {};
+        this.angryMonthCount = 0;
+        this.happyMonthCount = 0;
+        this.moderatMonthCount = 0;
+        this.angryMonthCountArray = [];
+        this.happyMonthCountArray = [];
+        this.moderatMonthCountArray = [];
+        this.lastDate = "";
 
 
         this.state = {
@@ -37,10 +48,14 @@ class Home extends Component {
             angryWeekCountArray: [],
             happyWeekCountArray: [],
             moderatWeekCountArray: [],
+            angryMonthCountArray: [],
+            happyMonthCountArray: [],
+            moderatMonthCountArray: [],
             iteration: 0,
             flag: true,
             countClicks: {},
-            selectedBranch: 'select branch'
+            selectedBranch: 'select branch',
+            datesArray: []
         }
     }
 
@@ -49,11 +64,81 @@ class Home extends Component {
             formatedDate = `${date.slice(0, 2)},${month[Number(date.slice(3, 5)) - 1]} ${date.slice(6, 10)}`;
         return formatedDate;
     }
+    getMonthlyDatesArray = (newDate, branch) => {
 
+        let date = new Date(this.dateFormatter(newDate));
+        console.log("initial date", date)
+        let firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+        let lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+        let array = [];
+        let firstDate = firstDay.getDate();
+        let lastDate = lastDay.getDate();
+        this.lastDate = lastDate;
+
+        for (let i = firstDate; i <= lastDate; i++) {
+            let day = i.toString().length === 1 ? ('0' + i.toString()) : i;
+            let month = date.getMonth() + 1;
+            month = month.toString().length > 1 ? month : `0${month}`;
+            let fullDate = `${day}-${month}-${date.getFullYear()}`;
+            this.props.getMonthlyData(fullDate, branch)
+            array.push(fullDate);
+
+        }
+        this.setState({ datesArray: array })
+        return array
+    }
+    MonthlyDateHandler = (event) => {
+        let date = event.target.value;
+        let year = date.slice(0, 4);
+        let month = date.slice(5, 7)
+        let day = date.slice(8, 10);
+        let fullDate = `${day}-${month}-${year}`
+        console.log(fullDate);
+        this.iteration = 0;
+        this.props.clearMonthlyArray()
+        this.getMonthlyDatesArray(fullDate, this.state.selectedBranch)
+    }
+    weeklyDataHandler=(event)=>{
+        this.props.clearWeeklyArray();
+        this.iteration=0;
+        let currDate = event.target.value;
+        let year = currDate.slice(0, 4);
+        let _month = currDate.slice(5, 7)
+        let _day = currDate.slice(8, 10);
+        let _fullDate = `${_day}-${_month}-${year}`
+
+        console.log("_fullDate",_fullDate);
+
+        let date = this.getMonday(this.dateFormatter(_fullDate));
+        let month = date.getMonth() + 1;
+        month = month.toString().length > 1 ? month : `0${month}`;
+        let day = date.getDate().toString().length == 1 ? `0${date.getDate()}` : date.getDate()
+        let fullDate = `${day}-${month}-${date.getFullYear()}`;
+        this.datesArray[0] = fullDate;
+        console.log("full Date",fullDate)
+        for (let i = 1; i <= 6; i++) {
+            let date = this.getMonday(this.dateFormatter(_fullDate));
+            date = date.addDays(i);
+            let day = date.getDate().toString().length === 1 ? ('0' + date.getDate().toString()) : date.getDate();
+            let month = date.getMonth() + 1;
+            month = month.toString().length > 1 ? month : `0${month}`;
+            let fullDate = `${day}-${month}-${date.getFullYear()}`;
+            console.log("/////full date", fullDate )
+            this.datesArray.push(fullDate);
+
+
+        }
+        for (let i = 0; i < this.datesArray.length; i++) {
+            this.props.getWeeklyData(this.datesArray[i], this.state.selectedBranch);
+        }
+        this.datesArray = [];
+    }
     handleChange = event => {
+
         this.setState({ [event.target.name]: event.target.value });
         this.props.setCurrentBranch(event.target.value);
         this.iteration = 0;
+        this.getMonthlyDatesArray(this.props.currentDate, event.target.value)
         this.props.getHourlyData({ date: this.props.currentDate, branch: event.target.value });
         this.props.getRealtimeData(this.props.currentDate, event.target.value);
         let date = this.getMonday(this.dateFormatter(this.props.currentDate));
@@ -78,6 +163,8 @@ class Home extends Component {
         this.datesArray = [];
     };
     componentDidMount() {
+
+
     }
     shouldComponentUpdate(newProps, newState) {
         console.log("***recv props****", newProps);
@@ -85,7 +172,7 @@ class Home extends Component {
     }
     componentWillReceiveProps(nextProps) {
         this.iteration++;
-
+        console.log("iteration", this.iteration);
         if (nextProps.state) {
             if (this.iteration == 7) {
                 this.calculateResponsesHourlyWise(nextProps.state.hourlyData);
@@ -99,6 +186,15 @@ class Home extends Component {
                 this.props.hourlyDataFlagFalse();
             }
         }
+        if (this.iteration === this.lastDate + 12) {
+            console.log("inside calc of monthly 1", )
+            this.calculateResponsesMonthlyWise(nextProps.state.monthlyData)
+        }
+        if (this.iteration === this.lastDate + 2) {
+            console.log("inside calc of monthly 2", )
+            this.calculateResponsesMonthlyWise(nextProps.state.monthlyData)
+        }
+
     }
     // dateFormatter = (date) => {
     //     let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -186,6 +282,56 @@ class Home extends Component {
                 this.moderateWeekCount = 0;
                 this.angryWeekCount = 0;
                 this.happyWeekCount = 0
+            });
+        }
+    }
+    
+
+    calculateResponsesMonthlyWise = (array) => {
+        console.log(this);
+        if (array !== undefined) {
+            array.forEach((data, i) => {
+                let date = new Date(data.timeStamp).getDate();
+                this.happyMonthCount = this.happyMonthCountArray[date];
+                this.moderateMonthCount = this.moderatMonthCountArray[date];
+                this.angryMonthCount = this.angryMonthCountArray[date];
+                if (data.userResponse === 'satisfied') {
+                    if (this.happyMonthCount) {
+                        this.happyMonthCount++;
+                    } else {
+                        this.happyMonthCount = 1
+                    }
+                    this.happyMonthCountArray[date] = this.happyMonthCount;
+                }
+                if (data.userResponse === 'angry') {
+                    if (this.angryMonthCount) {
+                        this.angryMonthCount++;
+                    } else {
+                        this.angryMonthCount = 1
+                    }
+                    this.angryMonthCountArray[date] = this.angryMonthCount;
+                }
+                if (data.userResponse === 'moderat') {
+                    if (this.moderateMonthCount) {
+                        this.moderateMonthCount++;
+                    } else {
+                        this.moderateMonthCount = 1;
+                    }
+                    this.moderatMonthCountArray[date] = this.moderateMonthCount;
+                }
+            });
+            this.setState({
+                moderatMonthCountArray: this.moderatMonthCountArray,
+                happyMonthCountArray: this.happyMonthCountArray,
+                angryMonthCountArray: this.angryMonthCountArray
+            }, () => {
+                console.log(this.state.moderatMonthCountArray, this.state.happyMonthCountArray, this.state.angryMonthCountArray)
+                this.moderatMonthCountArray = [];
+                this.happyMonthCountArray = [];
+                this.angryMonthCountArray = [];
+                this.moderateMonthCount = 0;
+                this.angryMonthCount = 0;
+                this.happyMonthCount = 0
             });
         }
     }
@@ -368,6 +514,21 @@ class Home extends Component {
                             <Grid container justify='center' direction={'row'}>
                                 <Grid item md={10} xs={10} style={{ padding: 15 }}>
                                     <Card >
+                                        <CardContent>
+
+                                            <TextField
+                                                id="date"
+                                                label="Select Month"
+                                                type="date"
+                                                onChange={e => { this.weeklyDataHandler(e) }}
+
+
+                                                InputLabelProps={{
+                                                    shrink: true,
+                                                }}
+                                            />
+
+                                        </CardContent>
                                         <CardContent style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
                                             <BarChart heading={"Weekly Response"}
                                                 chartData={{
@@ -386,6 +547,51 @@ class Home extends Component {
                                                         {
                                                             label: 'Angry',
                                                             data: this.state.angryWeekCountArray,
+                                                            backgroundColor: "#E83E3B"
+                                                        }
+                                                    ]
+                                                }}
+                                            />
+                                        </CardContent>
+                                    </Card>
+                                </Grid>
+                            </Grid>
+                            <Grid container justify='center' direction={'row'}>
+                                <Grid item md={10} xs={10} style={{ padding: 15 }}>
+                                    <Card >
+                                        <CardContent>
+
+                                            <TextField
+                                                id="date"
+                                                label="Select Month"
+                                                type="date"
+                                                onChange={e => { this.MonthlyDateHandler(e) }}
+
+
+                                                InputLabelProps={{
+                                                    shrink: true,
+                                                }}
+                                            />
+
+                                        </CardContent>
+                                        <CardContent style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                                            <BarChart heading={"Monthly Response"}
+                                                chartData={{
+                                                    labels: this.state.datesArray, //x-axis label array
+                                                    datasets: [
+                                                        {
+                                                            label: 'Happy',
+                                                            data: this.state.happyMonthCountArray,
+                                                            backgroundColor: "#4FAB56"
+                                                        },
+                                                        {
+                                                            label: 'Moderate',
+                                                            data: this.state.moderatMonthCountArray,
+                                                            backgroundColor: '#F99D2C'
+                                                        },
+                                                        {
+                                                            label: 'Angry',
+                                                            data: this.state.angryMonthCountArray,
                                                             backgroundColor: "#E83E3B"
                                                         }
                                                     ]
@@ -423,7 +629,10 @@ const mapDispatchToPorps = (dispatch) => {
         getWeeklyData: (date, branch) => dispatch(DBActions.getWeeklyData(date, branch)),
         getRealtimeData: (date, branch) => dispatch(DBActions.getRealTimeData(date, branch)),
         hourlyDataFlagFalse: () => dispatch(DBActions.hourlyDataFlagFalse()),
-        setCurrentBranch: (branch) => dispatch(DBActions.setCurrentBranch(branch))
+        setCurrentBranch: (branch) => dispatch(DBActions.setCurrentBranch(branch)),
+        getMonthlyData: (date, branch) => dispatch(DBActions.getMonthlyData(date, branch)),
+        clearMonthlyArray: () => dispatch(DBActions.clearMonthlyArray()),
+        clearWeeklyArray:()=>dispatch(DBActions.clearWeeklyArray())
     }
 }
 export default connect(mapStateToPorps, mapDispatchToPorps)(Home);

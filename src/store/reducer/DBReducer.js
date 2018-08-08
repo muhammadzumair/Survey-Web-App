@@ -10,9 +10,10 @@ let intialState = {
     realTimeData: [],
     branchesArray: [],
     hourlyDataFlag: true,
-    iteration:0,
-    currentDate:null,
-    branchesArray:[]
+    iteration: 0,
+    currentDate: null,
+    branchesArray: [],
+    monthlyData: [],
 }
 
 function DBReducer(state = intialState, action) {
@@ -63,21 +64,35 @@ function DBReducer(state = intialState, action) {
 
 
         case actionTypes.SET_CURRENT_BRANCH:
-            return Object.assign({}, state, {currentBranch: action.payload, weeklyData: []});
+            return Object.assign({}, state, { currentBranch: action.payload, weeklyData: [] });
         case actionTypes.INCREMENT_ITERATION:
-            return Object.assign({},state,{iteration:state.iteration++});
+            return Object.assign({}, state, { iteration: state.iteration++ });
         case actionTypes.RESET_ITERATION:
-        return Object.assign({},state,{iteration:0});
+            return Object.assign({}, state, { iteration: 0 });
 
 
         case actionTypes.GET_CURRENT_DATE_PROGRESS:
-        return Object.assign({},state,{isProgress:true});
+            return Object.assign({}, state, { isProgress: true });
         case actionTypes.GET_CURRENT_DATE_SUCCEED:
-        return Object.assign({},state,{isProgress:false,currentDate:action.payload});
+            return Object.assign({}, state, { isProgress: false, currentDate: action.payload });
         case actionTypes.GET_CURRENT_DATE_FAIL:
-        return Object.assign({},state,{isProgress:false,isError:true,errorMessage:action.payload})
+            return Object.assign({}, state, { isProgress: false, isError: true, errorMessage: action.payload })
 
 
+
+        case actionTypes.GET_MONTHLY_DATA_PROGRESS:
+            return Object.assign({}, state, { isProgress: true });
+        case actionTypes.GET_MONTHLY_DATA_SUCCEED:
+            return Object.assign({}, state, { isProgress: false, monthlyData: [...state.monthlyData, ...action.payload] });
+        case actionTypes.GET_MONTHLY_DATA_FAIL:
+            return Object.assign({}, state, { isError: true, errorMessage: action.payload });
+
+        case actionTypes.CLEAR_MONTHLY_ARRAY:
+        return Object.assign({},state,{monthlyData:[]});
+
+        case actionTypes.CLEAR_WEEKLY_ARRAY:
+        return Object.assign({},state,{weeklyData:[]})
+        
         default:
             return state;
     }

@@ -84,6 +84,17 @@ export default class FirebaseDB {
             });
         })
     }
+    static getMonthlyData(date, branch) {
+        return new Promise((res, rej) => {
+            Fire.firestore().collection('Response').doc(branch).collection(date).get()
+                .then(data => {
+                    res(snapshotToArray(data))
+                })
+                .catch(err => {
+                    rej(err);
+                })
+        })
+    }
 
 }
 

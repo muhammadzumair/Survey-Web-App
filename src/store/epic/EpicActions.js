@@ -88,6 +88,22 @@ export default class EpicActions {
                 })
         })
     }
+    static getMonthlyData(action$) {
+        return action$.ofType(actionTypes.GET_MONTHLY_DATA_PROGRESS)
+            .mergeMap(({ payload }) => {
+                return Observable.fromPromise(FirebaseDB.getMonthlyData(payload.date, payload.branch))
+                    .map(data => {
+                        return {
+                            type: actionTypes.GET_MONTHLY_DATA_SUCCEED,
+                            payload: data
+                        }
+                    })
+                    .catch(err => {
+                        return Observable.of({ type: actionTypes.GET_MONTYLY_DATA_FAIL, payload: err.message });
+                    })
+            })
+    }
+
 }
 function dateConvertor(dateFromServer) {
     let str = dateFromServer;

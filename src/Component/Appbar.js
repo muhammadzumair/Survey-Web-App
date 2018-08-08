@@ -23,6 +23,7 @@ class Appbar extends Component {
       <div>
         <AppBar position="static" style={{ backgroundColor: "#d5d5d5" }}>
           <Toolbar style={{ display: "flex", flex: 1, justifyContent: 'flex-end' }} >
+         
             <div  >
               <Select
                 name
@@ -42,6 +43,7 @@ class Appbar extends Component {
                 }
               </Select>
             </div>
+            
           </Toolbar>
         </AppBar>
       </div >
