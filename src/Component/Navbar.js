@@ -56,9 +56,11 @@ class Navbar extends Component {
     }
     obj[name] = '#37a4d2';
     this.setState({ colorObj: obj });
+    this.props.history.push(name);
   }
 
   render() {
+    console.log('this.props.child: ', this.props.children);
     return (
       <div style={{ display: 'flex', flex: 1 }}>
         <div style={{ width: '25vw', position: 'fixed', border: "2px solid", backgroundColor: "#3d3d3d", height: '100vh' }} className='col-1'>
@@ -97,7 +99,7 @@ class Navbar extends Component {
           </List>
         </div>
         <div style={{ width: '75vw', marginLeft: '25vw', overflow: 'auto' }} className='col-2'>
-          <Appbar changeHandler={(event)=>this.props.changeHandler(event)} selectedBranch={this.props.selectedBranch} />
+          <Appbar changeHandler={(event) => this.props.changeHandler(event)} selectedBranch={this.props.selectedBranch} />
           {this.props.children}
         </div>
 

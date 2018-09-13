@@ -9,10 +9,50 @@ import DoughnutChart from '../Component/DoughnutChart';
 import BarChart from '../Component/BarChart';
 import DBActions from '../store/action/DBActions';
 import TextField from '@material-ui/core/TextField';
+import LineChart from '../Component/LineChart';
 import Select from '@material-ui/core/Select';
+import { Progress } from 'semantic-ui-react';
+import Location from '@material-ui/icons/LocationOn';
+import Play from '@material-ui/icons/PlayCircleFilled';
+import Pause from '@material-ui/icons/PauseCircleFilled';
+import AudioPlayer from '../Component/AudioPlayer';
+import 'semantic-ui-css/semantic.min.css';
+import './ReasonAnalytics.css'; Play
+const Images = {
+    'satisfied': './assets/happy.png',
+    'moderat': './assets/moderate.png',
+    'angry': './assets/__sad.png'
 
+}
+function timeAndDateformatter(dateStr) {
+    let dateStr1 = new Date(dateStr).toISOString();
+    let date = dateStr1.slice(0, dateStr1.indexOf('T'));
+    let time = dateStr1.slice(dateStr1.indexOf('T') + 1, dateStr1.indexOf('.'));
+    time = time.split(':'); // convert to array
+    console.log('time: ', time);
+    // fetch
+    var hours = Number(time[0]);
+    var minutes = Number(time[1]);
+    var seconds = Number(time[2]);
 
-class Home extends Component {
+    // calculate
+    var timeValue;
+
+    if (hours > 0 && hours <= 12) {
+        timeValue = "" + hours;
+    } else if (hours > 12) {
+        timeValue = "" + (hours - 12);
+    } else if (hours == 0) {
+        timeValue = "12";
+    }
+
+    timeValue += (minutes < 10) ? ":0" + minutes : ":" + minutes;  // get minutes
+    timeValue += (seconds < 10) ? ":0" + seconds : ":" + seconds;  // get seconds
+    timeValue += (hours >= 12) ? " P.M." : " A.M.";  // get AM/PM
+    return date + " " + timeValue;
+}
+
+class ReasonAnalytics extends Component {
 
     constructor(props) {
         super(props);
@@ -38,12 +78,20 @@ class Home extends Component {
         this.iteration = 0;
         this.clicksObject = {};
         this.lastDate = 0;
-
+        this.angryReasonsCount = {};
+        this.responseArray = [];
+        this.audioRef = {}
+        let angryCountArray = [], moderateCountArray = [], happyCountArray = [];
+        for (let i = 0; i <= 23; i++) {
+            this.angryHourCountArray[i] = 0;
+            this.moderateHourCountArray[i] = 0;
+            this.happyHourCountArray[i] = 0;
+        }
 
         this.state = {
-            angryHourCountArray: [],
-            happyHourCountArray: [],
-            moderateHourCountArray: [],
+            angryHourCountArray: this.angryHourCountArray,
+            happyHourCountArray: this.moderateHourCountArray,
+            moderateHourCountArray: this.happyHourCountArray,
             angryWeekCountArray: [],
             happyWeekCountArray: [],
             moderatWeekCountArray: [],
@@ -55,6 +103,15 @@ class Home extends Component {
             countClicks: {},
             selectedBranch: this.props.selectedBranch,
             datesArray: [],
+            angryReasonsArray: [],
+            moderateReasonsArray: [],
+            angryReasonsCount: {
+                'Waiting Time': 0,
+                'Bad Service': 0,
+                'Enviroment': 0,
+                'Attitude': 0
+            },
+            responseArray: []
         }
     }
 
@@ -116,7 +173,6 @@ class Home extends Component {
     };
 
     componentDidMount() {
-        // this.setState({ [event.target.name]: event.target.value });
         if (this.props.selectedBranch !== 'select branch') {
             console.log(this.props.currentDate);
             this.props.setCurrentBranch(this.props.selectedBranch);
@@ -187,6 +243,8 @@ class Home extends Component {
     //     return `${day},${months[Number(month - 1)]} ${year}`;
     // }
     dailyClicksCount = (array) => {
+        console.log('data in daily clicks count array((((((((((((((((((((((((: ', array);
+        let { angryReasonsCount, angryReasonsArray, moderateReasonsArray } = this.state;
         if (array) {
             array.forEach((data, i) => {
                 let angryCount = this.clicksObject['angry'];
@@ -198,6 +256,15 @@ class Home extends Component {
                     } else {
                         angryCount = 1
                     }
+
+                    if (this.angryReasonsCount[data.reason]) {
+                        this.angryReasonsCount[data.reason] += 1;
+                        console.log('calculated AngryReasonCounts ///////////*/*/*/*/: ', this.angryReasonsCount[data.reason]);
+                    } else {
+                        this.angryReasonsCount[data.reason] = 1;
+                    }
+                    angryReasonsArray.push(data);
+                    this.responseArray.push(data);
                     this.clicksObject['angry'] = angryCount;
                 }
                 if (data.userResponse === 'satisfied') {
@@ -206,6 +273,7 @@ class Home extends Component {
                     } else {
                         happyCount = 1
                     }
+                    this.responseArray.push(data);
                     this.clicksObject['happy'] = happyCount;
                 }
                 if (data.userResponse === 'moderat') {
@@ -214,11 +282,22 @@ class Home extends Component {
                     } else {
                         moderatCount = 1
                     }
+                    moderateReasonsArray.push(data);
+                    this.responseArray.push(data);
                     this.clicksObject['moderat'] = moderatCount;
                 }
             });
-            this.setState({ countClicks: this.clicksObject }, function () {
+            this.setState({
+                countClicks: this.clicksObject,
+                moderateReasonsArray: [...moderateReasonsArray],
+                angryReasonsArray: [...angryReasonsArray],
+                angryReasonsCount: this.angryReasonsCount,
+                responseArray: this.responseArray
+            }, function () {
                 this.clicksObject = {};
+                this.angryReasonsCount = {};
+                this.responseArray = [];
+                console.log('calculated AngryReasonCounts ///////////*/*/*/*/: ', this.state.angryReasonsArray, this.state.moderateReasonsArray);
             });
         }
     }
@@ -364,6 +443,20 @@ class Home extends Component {
                     this.happyHourCountArray[timeHours] = this.happyCount
                 }
             });
+            for (let i = 0; i <= 23; i++) {
+                if (this.angryHourCountArray[i] === undefined) {
+                    this.angryHourCountArray[i] = 0;
+                }
+                if (this.moderateHourCountArray[i] === undefined) {
+                    this.moderateHourCountArray[i] = 0;
+                }
+                if (this.happyHourCountArray[i] === undefined) {
+                    this.happyHourCountArray[i] = 0;
+                }
+                // this.angryHourCountArray[i] = 0;
+                // this.moderateHourCountArray[i] = 0;
+                // this.happyHourCountArray[i] = 0;
+            }
             this.setState({
                 happyHourCountArray: [...this.happyHourCountArray],
                 moderateHourCountArray: [...this.moderateHourCountArray],
@@ -415,7 +508,10 @@ class Home extends Component {
         this.datesArray = [];
         this.iteration = 0;
     }
+
+
     render() {
+        console.log('this.state.responseArray ', this.state.responseArray);
         return (
             <Navbar history={this.props.history} changeHandler={(event) => this.handleChange(event)} selectedBranch={this.state.selectedBranch}>
                 {
@@ -427,11 +523,11 @@ class Home extends Component {
                                         <CardContent style={{ display: "flex", flexDirection: "row", justifyContent: "space-between" }} >
                                             <img src={require('./assets/happy.png')} height='125px' width='125px' />
                                             <div style={{ display: "flex", flexDirection: "column", justifyContent: "center" }} >
-                                                <Typography variant="caption" gutterBottom>
+                                                <Typography variant="caption" style={{ textAlign: 'center' }} gutterBottom>
                                                     Happy Clicks
                                                 </Typography>
                                                 <Typography variant="display2" style={{ textAlign: "center" }} gutterBottom>
-                                                    {this.state.countClicks['happy']}
+                                                    {this.state.countClicks['happy'] || 0}
                                                 </Typography>
                                             </div>
                                         </CardContent>
@@ -443,11 +539,11 @@ class Home extends Component {
                                         <CardContent style={{ display: "flex", flexDirection: "row", justifyContent: "space-between" }} >
                                             <img src={require('./assets/moderate.png')} height='125px' width='125px' />
                                             <div style={{ display: "flex", flexDirection: "column", justifyContent: "center" }} >
-                                                <Typography variant="caption" gutterBottom>
+                                                <Typography variant="caption" style={{ textAlign: 'center' }} gutterBottom>
                                                     Moderate Clicks
                                     </Typography>
                                                 <Typography variant="display2" style={{ textAlign: "center" }} gutterBottom>
-                                                    {this.state.countClicks['moderat']}
+                                                    {this.state.countClicks['moderat'] || 0}
                                                 </Typography>
                                             </div>
                                         </CardContent>
@@ -459,11 +555,11 @@ class Home extends Component {
                                         <CardContent style={{ display: "flex", flexDirection: "row", justifyContent: "space-between" }} >
                                             <img src={require('./assets/__sad.png')} height='125px' width='125px' />
                                             <div style={{ display: "flex", flexDirection: "column", justifyContent: "center" }} >
-                                                <Typography variant="caption" gutterBottom>
+                                                <Typography variant="caption" gutterBottom style={{ textAlign: 'center' }}>
                                                     Angry Clicks
-                                    </Typography>
+                                                </Typography>
                                                 <Typography variant="display2" style={{ textAlign: "center" }} gutterBottom>
-                                                    {this.state.countClicks['angry']}
+                                                    {this.state.countClicks['angry'] || 0}
                                                 </Typography>
                                             </div>
                                         </CardContent>
@@ -473,39 +569,112 @@ class Home extends Component {
                             </Grid>
 
                             <Grid container justify='center' direction={'row'}>
-                                <Grid item md={8} xs={10} style={{ padding: 15 }}>
+                                <Grid item md={12} xs={10} style={{ padding: 15 }}>
                                     <Card >
                                         <CardContent style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-                                            <BarChart heading={"Hourly Response"}
+                                            <LineChart heading={"Hourly Response"}
                                                 chartData={{
-                                                    labels: ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'], //x-axis label array
+                                                    labels: ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'],
                                                     datasets: [
                                                         {
-                                                            label: 'Happy',
+                                                            label: "Happy ",
+                                                            // fill: false,
+                                                            // lineTension: 0.1,
+                                                            backgroundColor: "transparent",
+                                                            borderColor: "#4FAB56", // The main line color
+                                                            // borderCapStyle: 'square',
+                                                            // borderDash: [], // try [5, 15] for instance
+                                                            // borderDashOffset: 0.0,
+                                                            // borderJoinStyle: 'miter',
+                                                            // pointBorderColor: "white",
+                                                            // pointBackgroundColor: "#4FAB56",
+                                                            // pointBorderWidth: 1,
+                                                            // pointHoverRadius: 8,
+                                                            // pointHoverBackgroundColor: "#4FAB56",
+                                                            // pointHoverBorderColor: "#4FAB56x",
+                                                            // pointHoverBorderWidth: 2,
+                                                            // pointRadius: 4,
+                                                            // pointHitRadius: 10,
+                                                            // notice the gap in the data and the spanGaps: true
                                                             data: this.state.happyHourCountArray,
-                                                            backgroundColor: "#4FAB56"
-                                                        },
-                                                        {
-                                                            label: 'Moderate',
+                                                            // spanGaps: true,
+                                                        }, {
+                                                            label: "Moderat",
+                                                            // fill: true,
+                                                            // lineTension: 0.1,
+                                                            backgroundColor: "transparent",
+                                                            borderColor: "#F99D2C",
+                                                            // borderCapStyle: 'butt',
+                                                            // borderDash: [],
+                                                            // borderDashOffset: 0.0,
+                                                            // borderJoinStyle: 'miter',
+                                                            // pointBorderColor: "white",
+                                                            // pointBackgroundColor: "#F99D2C",
+                                                            // pointBorderWidth: 1,
+                                                            // pointHoverRadius: 8,
+                                                            // pointHoverBackgroundColor: "#F99D2C",
+                                                            // pointHoverBorderColor: "#F99D2C",
+                                                            // pointHoverBorderWidth: 2,
+                                                            // pointRadius: 4,
+                                                            // pointHitRadius: 10,
+                                                            // notice the gap in the data and the spanGaps: false
                                                             data: this.state.moderateHourCountArray,
-                                                            backgroundColor: '#F99D2C'
+                                                            // spanGaps: false,
                                                         },
                                                         {
-                                                            label: 'Angry',
+                                                            label: "Angry",
+                                                            // fill: true,
+                                                            // lineTension: 0.1,
+                                                            backgroundColor: "transparent",
+                                                            borderColor: "#E83E3B",
+                                                            // borderCapStyle: 'butt',
+                                                            // borderDash: [],
+                                                            // borderDashOffset: 0.0,
+                                                            // borderJoinStyle: 'miter',
+                                                            // pointBorderColor: "white",
+                                                            // pointBackgroundColor: "#E83E3B",
+                                                            // pointBorderWidth: 1,
+                                                            // pointHoverRadius: 8,
+                                                            // pointHoverBackgroundColor: "#E83E3B",
+                                                            // pointHoverBorderColor: "#E83E3B",
+                                                            // pointHoverBorderWidth: 2,
+                                                            // pointRadius: 4,
+                                                            // pointHitRadius: 10,
+                                                            // notice the gap in the data and the spanGaps: false
                                                             data: this.state.angryHourCountArray,
-                                                            backgroundColor: "#E83E3B"
+                                                            // spanGaps: false,
                                                         }
                                                     ]
+                                                    // labels: ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'], //x-axis label array
+                                                    // datasets: [
+                                                    //     {
+                                                    //         label: 'Happy',
+                                                    //         data: this.state.happyHourCountArray,
+                                                    //         backgroundColor: "#4FAB56"
+                                                    //     }
+                                                    //     {
+                                                    //         label: 'Moderate',
+                                                    //         data: this.state.moderateHourCountArray,
+                                                    //         backgroundColor: '#F99D2C'
+                                                    //     },
+                                                    //     {
+                                                    //         label: 'Angry',
+                                                    //         data: this.state.angryHourCountArray,
+                                                    //         backgroundColor: "#E83E3B"
+                                                    //     }
+                                                    // ]
                                                 }}
                                             />
                                         </CardContent>
                                     </Card>
                                 </Grid>
-                                <Grid item md={4} xs={10} style={{ padding: 15 }}>
+                            </Grid>
+                            <Grid container justify='center' direction='row'>
+                                <Grid item md={6} xs={10} style={{ padding: 15 }}>
                                     <Card >
                                         <CardContent style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
                                             <DoughnutChart
-                                                heading={"Clicks Response"}
+                                                heading="Total Response"
                                                 chartData={{
                                                     labels: ['Happy', 'Moderate', 'Angry'],
                                                     datasets: [
@@ -529,8 +698,121 @@ class Home extends Component {
                                         </CardContent>
                                     </Card>
                                 </Grid>
+                                <Grid item md={6} xs={10} style={{ padding: 15, height: '100%' }}>
+                                    <Card CardContent style={{ height: '100%' }}>
+                                        <CardContent style={{ height: '100%' }}>
+                                            <Typography variant="subheading" style={{ textAlign: "center" }} gutterBottom>
+                                                PAIN POINTS
+                                            </Typography>
+                                            <div>
+                                                <div>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                                        <Typography variant="caption">Waiting Time</Typography>
+                                                        <div>
+                                                            {this.state.angryReasonsCount['Waiting Time']}
+                                                        </div>
+                                                    </div>
+                                                    <Progress size="tiny" percent={this.state.angryReasonsCount['Waiting Time'] + 5} color='red' />
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                                    <Typography variant="caption">Enviroment</Typography>
+                                                    <div>
+                                                        {this.state.angryReasonsCount['Enviroment']}
+                                                    </div>
+                                                </div>
+                                                <Progress size="tiny" percent={this.state.angryReasonsCount['Enviroment'] + 5} color='brown' />
+                                            </div>
+                                            <div>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                                    <Typography variant="caption">Attitude</Typography>
+                                                    <div>
+                                                        {this.state.angryReasonsCount['Attitude']}
+                                                    </div>
+                                                </div>
+                                                <Progress size="tiny" percent={this.state.angryReasonsCount['Attitude'] + 5} color='teal' />
+                                            </div>
+                                            <div>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                                    <Typography variant="caption">Bad Service</Typography>
+                                                    <div>
+                                                        {this.state.angryReasonsCount['Bad Service']}
+                                                    </div>
+                                                </div>
+                                                <Progress size="tiny" percent={this.state.angryReasonsCount['Bad Service']} color='blue' />
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                </Grid>
                             </Grid>
-                            <Grid container justify='center' direction={'row'}>
+                            <Grid container justify="center" direction="row">
+                                <Grid item md={12} xs={10} style={{ padding: 15 }}>
+                                    <Card>
+                                        <CardContent>
+                                            <h3>OPEN FEEDBACK</h3>
+                                        </CardContent>
+                                        {
+                                            this.state.responseArray.map((data) => {
+                                                console.log('Images: ', Images[data.userResponse]);
+                                                console.log('dDDDDDDDDdddate: ', Date(data.timeStamp));
+
+                                                return (
+                                                    <CardContent>
+                                                        <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+                                                            <div>
+                                                                <img src={require(`${Images[data.userResponse]}`)} className='openFeedbackImg' />
+                                                            </div>
+                                                            <div style={{ marginLeft: '15px' }}>
+                                                                {
+                                                                    data.message && data.message.length ?
+                                                                        <div style={{
+                                                                            backgroundColor: 'lightgray',
+                                                                            padding: '10px',
+                                                                            borderRadius: '10px',
+                                                                            fontSize: '13px'
+                                                                        }}>
+                                                                            <span>
+                                                                                {data.message}
+                                                                            </span>
+                                                                        </div>
+                                                                        :
+                                                                        null
+                                                                }
+                                                                <div style={{ display: 'flex', alignItems: 'flex-end', alignSelf: 'flex-end' }}>
+                                                                    <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+                                                                        <span style={{ color: '#a9a9a9', fontSize: '10.5px' }}>
+                                                                            {timeAndDateformatter(data.timeStamp)};
+                                                                    </span>
+                                                                        <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+                                                                            <Location style={{ color: "#a9a9a9", fontSize: '15px' }} />
+                                                                            <span style={{ fontWeight: 'bold', color: '#a9a9a9', fontSize: '13px' }}>
+                                                                                {data.location}
+                                                                            </span>
+                                                                        </span>
+                                                                    </div>
+
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div >
+                                                            {
+                                                                data.audioURL ?
+                                                                    <AudioPlayer audioURL={data.audioURL} />
+                                                                    :
+                                                                    null
+
+                                                            }
+                                                        </div>
+
+                                                    </CardContent>
+                                                )
+                                            })
+                                        }
+                                    </Card>
+                                </Grid>
+                            </Grid>
+                            {/* <Grid container justify='center' direction={'row'}>
                                 <Grid item md={10} xs={10} style={{ padding: 15 }}>
                                     <Card >
                                         <CardContent>
@@ -610,8 +892,8 @@ class Home extends Component {
                                             />
                                         </CardContent>
                                     </Card>
-                                </Grid>
-                            </Grid>
+                                </Grid> //Month and Weekly Data 
+                            </Grid> */}
                         </div>
                 }
             </Navbar>
@@ -647,4 +929,4 @@ const mapDispatchToPorps = (dispatch) => {
         clearWeeklyArray: () => dispatch(DBActions.clearWeeklyArray()),
     }
 }
-export default connect(mapStateToPorps, mapDispatchToPorps)(Home);
+export default connect(mapStateToPorps, mapDispatchToPorps)(ReasonAnalytics);

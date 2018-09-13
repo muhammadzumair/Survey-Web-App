@@ -5,15 +5,15 @@ import { Bar } from 'react-chartjs-2';
 export default class BarChart extends Component {
     constructor(props) {
         super(props);
-        
+
     }
-    componentWillReceiveProps(nextProps){
+    componentWillReceiveProps(nextProps) {
         this.forceUpdate()
     }
-    
+
     render() {
         return (
-            
+
             <Bar
                 data={this.props.chartData}
                 height={350}
@@ -39,7 +39,7 @@ export default class BarChart extends Component {
 
                     }}
             />
-            
+
         )
     }
 }

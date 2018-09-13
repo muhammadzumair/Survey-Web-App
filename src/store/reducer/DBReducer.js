@@ -16,6 +16,7 @@ let intialState = {
     isProgressGetDataDateWise: false,
     dateWiseDataArray: [],
     isErrorGetDataDateWise: false,
+    currentBranch: 'select branch'
 }
 
 function DBReducer(state = intialState, action) {
@@ -82,19 +83,19 @@ function DBReducer(state = intialState, action) {
 
         //clear Array to prevent data doubling
         case actionTypes.CLEAR_MONTHLY_ARRAY:
-            return Object.assign({}, state, {dateWiseDataArray: []});
+            return Object.assign({}, state, { dateWiseDataArray: [] });
         case actionTypes.CLEAR_WEEKLY_ARRAY:
-            return Object.assign({}, state, {weeklyData:[]});
+            return Object.assign({}, state, { weeklyData: [] });
 
 
 
         case actionTypes.GET_DATA_DATE_WISE_PROGRESS:
-            return Object.assign({}, state, {isProgressGetDataDateWise: true});
+            return Object.assign({}, state, { isProgressGetDataDateWise: true });
         case actionTypes.GET_DATA_DATE_WISE_SUCCEED:
             console.log('request succeed: ', action.payload);
-            return Object.assign({}, state, {isProgressGetDataDateWise: false, dateWiseDataArray: [...state.dateWiseDataArray, ...action.payload]});
+            return Object.assign({}, state, { isProgressGetDataDateWise: false, dateWiseDataArray: [...state.dateWiseDataArray, ...action.payload] });
         case actionTypes.GET_DATA_DATE_WISE_FAIL:
-            return Object.assign({}, state, {isProgressGetDataDateWise: false, isErrorGetDataDateWise: true, errorMessage: action.payload});
+            return Object.assign({}, state, { isProgressGetDataDateWise: false, isErrorGetDataDateWise: true, errorMessage: action.payload });
 
         default:
             return state;

@@ -1,0 +1,14 @@
+.play-btn{
+}
+.play-btn:active{
+    color: lightslategrey;
+}
+.btn{
+    cursor: pointer;
+    display: inline-flex;
+    padding:2px;
+    border: 0px;
+    background: transparent;
+    outline: none;
+    border-radius: 100%
+}
