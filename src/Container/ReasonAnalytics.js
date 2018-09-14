@@ -264,7 +264,24 @@ class ReasonAnalytics extends Component {
                         this.angryReasonsCount[data.reason] = 1;
                     }
                     angryReasonsArray.push(data);
-                    this.responseArray.push(data);
+                    let index = 0, flag = false;
+                    for (let i = 0; i <= this.responseArray.length; i++) {
+                        console.log('ddddddddddddddata: ', data);
+                        if (this.responseArray[i]) {
+                            if (data.key == this.responseArray[i].key) {
+                                // this.responseArray[i] = data;
+                                index = i;
+                                flag = true;
+                            }
+                        }
+                    }
+                    if (!flag) {
+                        this.responseArray.push(data);
+                    } else {
+                        this.responseArray[index] = data;
+                        index = 0;
+                        flag = false;
+                    }
                     this.clicksObject['angry'] = angryCount;
                 }
                 if (data.userResponse === 'satisfied') {
@@ -273,7 +290,25 @@ class ReasonAnalytics extends Component {
                     } else {
                         happyCount = 1
                     }
-                    this.responseArray.push(data);
+                    let index = 0, flag = false;
+                    for (let i = 0; i <= this.responseArray.length; i++) {
+                        console.log('ddddddddddddddata: ', data);
+
+                        if (this.responseArray[i]) {
+                            if (data.key == this.responseArray[i].key) {
+                                // this.responseArray[i] = data;
+                                index = i;
+                                flag = true;
+                            }
+                        }
+                    }
+                    if (!flag) {
+                        this.responseArray.push(data);
+                    } else {
+                        this.responseArray[index] = data;
+                        index = 0;
+                        flag = false;
+                    }
                     this.clicksObject['happy'] = happyCount;
                 }
                 if (data.userResponse === 'moderat') {
@@ -283,7 +318,24 @@ class ReasonAnalytics extends Component {
                         moderatCount = 1
                     }
                     moderateReasonsArray.push(data);
-                    this.responseArray.push(data);
+                    let index = 0, flag = false;
+                    for (let i = 0; i <= this.responseArray.length; i++) {
+                        console.log('ddddddddddddddata: ', data);
+                        if (this.responseArray[i]) {
+                            if (data.key == this.responseArray[i].key) {
+                                // this.responseArray[i] = data;
+                                index = i;
+                                flag = true;
+                            }
+                        }
+                    }
+                    if (!flag) {
+                        this.responseArray.push(data);
+                    } else {
+                        this.responseArray[index] = data;
+                        index = 0;
+                        flag = false;
+                    }
                     this.clicksObject['moderat'] = moderatCount;
                 }
             });
