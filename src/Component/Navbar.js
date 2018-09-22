@@ -35,9 +35,9 @@ class Navbar extends Component {
       component: 'table',
       colorObj: {
         home: '#6c6c6c',
-        reason: '#6c6c6c',
+        weekly: '#6c6c6c',
         logout: '#6c6c6c',
-        add: '#6c6c6c'
+        monthly: '#6c6c6c'
       }
     }
   }
@@ -76,18 +76,18 @@ class Navbar extends Component {
               <p style={styles.listText} className='list-text'>Home</p>
             </ListItem>
             <Divider />
-            <ListItem button onClick={() => this.clicked("reason")} className='align-center'>
+            <ListItem button onClick={() => this.clicked("weekly")} className='align-center'>
               <ListItemIcon>
-                <ChartIcon style={{ marginRight: "0px", color: this.state.colorObj.reason }} />
+                <ChartIcon style={{ marginRight: "0px", color: this.state.colorObj.weekly }} />
               </ListItemIcon>
-              <p style={styles.listText} className='list-text'>Reason Analytics</p>
+              <p style={styles.listText} className='list-text'>Weekly</p>
             </ListItem>
             <Divider />
-            <ListItem button onClick={() => this.clicked("add")} className='align-center'>
+            <ListItem button onClick={() => this.clicked("monthly")} className='align-center'>
               <ListItemIcon>
-                <AddIcon style={{ marginRight: "0px", color: this.state.colorObj.add }} />
+                <AddIcon style={{ marginRight: "0px", color: this.state.colorObj.monthly }} />
               </ListItemIcon>
-              <p style={styles.listText} className='list-text'>Add Branch</p>
+              <p style={styles.listText} className='list-text'>Monthly Response</p>
             </ListItem>
             <Divider />
             <ListItem button onClick={() => this.clicked("logout")} className='align-center'>

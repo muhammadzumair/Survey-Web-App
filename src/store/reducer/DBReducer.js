@@ -46,7 +46,7 @@ function DBReducer(state = intialState, action) {
         case actionTypes.GET_WEEKLY_DATA_SUCCEED:
             return Object.assign({}, state, { isProgress: false, weeklyData: [...state.weeklyData, ...action.payload] });
         case actionTypes.GET_WEEKLY_DATA_FAIL:
-            return Object.assign({}, state, { isError: true, errorMessage: action.payload });
+            return Object.assign({}, state, { isProgress: false, isError: true, errorMessage: action.payload });
 
 
 

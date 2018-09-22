@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import { Router, Switch, Route } from 'react-router'
-import Home from './Container/Home';
+import Weekly from './Container/Weekly';
 import SignIn from './Container/Signin';
-import ReasonAnalytics from './Container/ReasonAnalytics';
+import Monthly from './Container/Monthly';
+import Home from './Container/Home';
 import createBrowserHistory from 'history/createBrowserHistory'
 const history = createBrowserHistory();
 const Routes = () => {
@@ -11,7 +12,8 @@ const Routes = () => {
             <Switch>
                 <Route exact path="/" component={SignIn} />
                 <Route path="/home" component={Home} />
-                <Route path="/reason" component={ReasonAnalytics} />
+                <Route path="/weekly" component={Weekly} />
+                <Route path="/monthly" component={Monthly} />
                 {/* <Route path="/add_branch" component={} /> */}
             </Switch>
         </Router>

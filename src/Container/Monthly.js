@@ -9,15 +9,16 @@ import DoughnutChart from '../Component/DoughnutChart';
 import BarChart from '../Component/BarChart';
 import DBActions from '../store/action/DBActions';
 import TextField from '@material-ui/core/TextField';
-import LineChart from '../Component/LineChart';
 import Select from '@material-ui/core/Select';
 import { Progress } from 'semantic-ui-react';
 import Location from '@material-ui/icons/LocationOn';
 import AudioPlayer from '../Component/AudioPlayer';
 import Play from '@material-ui/icons/PlayCircleFilled';
 import Pause from '@material-ui/icons/PauseCircleFilled';
+import Loader from 'react-loader-spinner';
 import 'semantic-ui-css/semantic.min.css';
 import './ReasonAnalytics.css';
+
 const Images = {
     'satisfied': './assets/happy.png',
     'moderat': './assets/moderate.png',
@@ -52,7 +53,8 @@ function timeAndDateformatter(dateStr) {
     return date + " " + timeValue;
 }
 
-class Home extends Component {
+
+class Monthly extends Component {
 
     constructor(props) {
         super(props);
@@ -78,20 +80,13 @@ class Home extends Component {
         this.iteration = 0;
         this.clicksObject = {};
         this.lastDate = 0;
-        this.angryReasonsCount = {};
         this.responseArray = [];
-        this.audioRef = {}
-        let angryCountArray = [], moderateCountArray = [], happyCountArray = [];
-        for (let i = 0; i <= 23; i++) {
-            this.angryHourCountArray[i] = 0;
-            this.moderateHourCountArray[i] = 0;
-            this.happyHourCountArray[i] = 0;
-        }
+
 
         this.state = {
-            angryHourCountArray: this.angryHourCountArray,
-            happyHourCountArray: this.moderateHourCountArray,
-            moderateHourCountArray: this.happyHourCountArray,
+            angryHourCountArray: [],
+            happyHourCountArray: [],
+            moderateHourCountArray: [],
             angryWeekCountArray: [],
             happyWeekCountArray: [],
             moderatWeekCountArray: [],
@@ -103,15 +98,10 @@ class Home extends Component {
             countClicks: {},
             selectedBranch: this.props.selectedBranch,
             datesArray: [],
-            angryReasonsArray: [],
-            moderateReasonsArray: [],
-            angryReasonsCount: {
-                'Waiting Time': 0,
-                'Bad Service': 0,
-                'Enviroment': 0,
-                'Attitude': 0
-            },
-            responseArray: []
+            responseArray: [],
+            isProgress: false,
+            responseArrayIterations: 10,
+            stopPaging: false
         }
     }
 
@@ -172,13 +162,20 @@ class Home extends Component {
         this.datesArray = [];
     };
 
+    componentWillUnmount() {
+        window.removeEventListener('scroll', this.callPaging);
+    }
+
     componentDidMount() {
+        this.props.clearMonthlyArray();
+        window.addEventListener('scroll', this.callPaging);
+        // this.setState({ [event.target.name]: event.target.value });
         if (this.props.selectedBranch !== 'select branch') {
             console.log(this.props.currentDate);
             this.props.setCurrentBranch(this.props.selectedBranch);
             this.iteration = 0;
             this.getMonthlyDatesArray(this.props.currentDate, this.props.selectedBranch);
-            this.props.getHourlyData({ date: this.props.currentDate, branch: this.props.selectedBranch });
+            // this.props.getHourlyData({ date: this.props.currentDate, branch: this.props.selectedBranch });
             this.props.getRealtimeData(this.props.currentDate, this.props.selectedBranch);
             let date = this.getMonday(this.dateFormatter(this.props.currentDate));
             let month = date.getMonth() + 1;
@@ -198,6 +195,7 @@ class Home extends Component {
             }
             for (let i = 0; i < this.datesArray.length; i++) {
                 this.props.getWeeklyData(this.datesArray[i], this.props.selectedBranch);
+                console.log("this.datesArray[i]: ", this.datesArray[i]);
             }
             this.datesArray = [];
         }
@@ -235,126 +233,180 @@ class Home extends Component {
         console.log('cal iteration: ', this.iteration);
 
     }
-    // dateFormatter = (date) => {
-    //     let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    //     let day = date.slice(0, 2);
-    //     let month = date.slice(3, 5)
-    //     let year = date.slice(6, 11);
-    //     return `${day},${months[Number(month - 1)]} ${year}`;
-    // }
+    dateFormatter = (date) => {
+        let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        let day = date.slice(0, 2);
+        let month = date.slice(3, 5)
+        let year = date.slice(6, 11);
+        return `${day},${months[Number(month - 1)]} ${year}`;
+    }
     dailyClicksCount = (array) => {
-        console.log('data in daily clicks count array((((((((((((((((((((((((: ', array);
-        let { angryReasonsCount, angryReasonsArray, moderateReasonsArray } = this.state;
-        if (array) {
-            array.forEach((data, i) => {
-                let angryCount = this.clicksObject['angry'];
-                let happyCount = this.clicksObject['happy'];
-                let moderatCount = this.clicksObject['moderat'];
-                if (data.userResponse === 'angry') {
-                    if (angryCount) {
-                        angryCount++;
-                    } else {
-                        angryCount = 1
-                    }
+        // if (array) {
+        //     array.forEach((data, i) => {
+        //         let angryCount = this.clicksObject['angry'];
+        //         let happyCount = this.clicksObject['happy'];
+        //         let moderatCount = this.clicksObject['moderat'];
+        //         if (data.userResponse === 'angry') {
+        //             if (angryCount) {
+        //                 angryCount++;
+        //             } else {
+        //                 angryCount = 1
+        //             }
+        //             this.clicksObject['angry'] = angryCount;
+        //         }
+        //         if (data.userResponse === 'satisfied') {
+        //             if (happyCount) {
+        //                 happyCount++;
+        //             } else {
+        //                 happyCount = 1
+        //             }
+        //             this.clicksObject['happy'] = happyCount;
+        //         }
+        //         if (data.userResponse === 'moderat') {
+        //             if (moderatCount) {
+        //                 moderatCount++;
+        //             } else {
+        //                 moderatCount = 1
+        //             }
+        //             this.clicksObject['moderat'] = moderatCount;
+        //         }
+        //     });
+        //     this.setState({ countClicks: this.clicksObject }, function () {
+        //         this.clicksObject = {};
+        //     });
+        // }
+    }
+    calculateResponsesWeeklyWise = (array) => {
+        // if (array !== undefined) {
+        //     array.forEach((data, i) => {
+        //         let angryCount = this.clicksObject['angry'];
+        //         let happyCount = this.clicksObject['happy'];
+        //         let moderatCount = this.clicksObject['moderat'];
+        //         let weekDay = new Date(data.timeStamp).getDay();
+        //         this.happyWeekCount = this.happyWeekCountArray[weekDay];
+        //         this.moderateWeekCount = this.moderatWeekCountArray[weekDay];
+        //         this.angryWeekCount = this.angryWeekCountArray[weekDay];
+        //         if (data.userResponse === 'satisfied') {
+        //             if (this.happyWeekCount) {
+        //                 this.happyWeekCount++;
+        //             } else {
+        //                 this.happyWeekCount = 1
+        //             }
+        //             this.happyWeekCountArray[weekDay] = this.happyWeekCount;
+        //             if (happyCount) {
+        //                 happyCount++;
+        //             } else {
+        //                 happyCount = 1
+        //             }
+        //             this.clicksObject['happy'] = happyCount;
 
-                    if (this.angryReasonsCount[data.reason]) {
-                        this.angryReasonsCount[data.reason] += 1;
-                        console.log('calculated AngryReasonCounts ///////////*/*/*/*/: ', this.angryReasonsCount[data.reason]);
-                    } else {
-                        this.angryReasonsCount[data.reason] = 1;
-                    }
-                    angryReasonsArray.push(data);
-                    let index = 0, flag = false;
-                    for (let i = 0; i <= this.responseArray.length; i++) {
-                        console.log('ddddddddddddddata: ', data);
-                        if (this.responseArray[i]) {
-                            if (data.key == this.responseArray[i].key) {
-                                // this.responseArray[i] = data;
-                                index = i;
-                                flag = true;
-                            }
-                        }
-                    }
-                    if (!flag) {
-                        this.responseArray.push(data);
-                    } else {
-                        this.responseArray[index] = data;
-                        index = 0;
-                        flag = false;
-                    }
-                    this.clicksObject['angry'] = angryCount;
-                }
-                if (data.userResponse === 'satisfied') {
-                    if (happyCount) {
-                        happyCount++;
-                    } else {
-                        happyCount = 1
-                    }
-                    let index = 0, flag = false;
-                    for (let i = 0; i <= this.responseArray.length; i++) {
-                        console.log('ddddddddddddddata: ', data);
 
-                        if (this.responseArray[i]) {
-                            if (data.key == this.responseArray[i].key) {
-                                // this.responseArray[i] = data;
-                                index = i;
-                                flag = true;
-                            }
-                        }
-                    }
-                    if (!flag) {
-                        this.responseArray.push(data);
-                    } else {
-                        this.responseArray[index] = data;
-                        index = 0;
-                        flag = false;
-                    }
-                    this.clicksObject['happy'] = happyCount;
-                }
-                if (data.userResponse === 'moderat') {
-                    if (moderatCount) {
-                        moderatCount++;
-                    } else {
-                        moderatCount = 1
-                    }
-                    moderateReasonsArray.push(data);
-                    let index = 0, flag = false;
-                    for (let i = 0; i <= this.responseArray.length; i++) {
-                        console.log('ddddddddddddddata: ', data);
-                        if (this.responseArray[i]) {
-                            if (data.key == this.responseArray[i].key) {
-                                // this.responseArray[i] = data;
-                                index = i;
-                                flag = true;
-                            }
-                        }
-                    }
-                    if (!flag) {
-                        this.responseArray.push(data);
-                    } else {
-                        this.responseArray[index] = data;
-                        index = 0;
-                        flag = false;
-                    }
-                    this.clicksObject['moderat'] = moderatCount;
-                }
-            });
-            this.setState({
-                countClicks: this.clicksObject,
-                moderateReasonsArray: [...moderateReasonsArray],
-                angryReasonsArray: [...angryReasonsArray],
-                angryReasonsCount: this.angryReasonsCount,
-                responseArray: this.responseArray
-            }, function () {
-                this.clicksObject = {};
-                this.angryReasonsCount = {};
-                this.responseArray = [];
-                console.log('calculated AngryReasonCounts ///////////*/*/*/*/: ', this.state.angryReasonsArray, this.state.moderateReasonsArray);
-            });
-        }
+        //             let index = 0, flag = false;
+        //             for (let i = 0; i <= this.responseArray.length; i++) {
+        //                 if (this.responseArray[i]) {
+        //                     if (data.key == this.responseArray[i].key) {
+        //                         // this.responseArray[i] = data;
+        //                         index = i;
+        //                         flag = true;
+        //                     }
+        //                 }
+        //             }
+        //             if (!flag) {
+        //                 this.responseArray.push(data);
+        //             } else {
+        //                 this.responseArray[index] = data;
+        //                 index = 0;
+        //                 flag = false;
+        //             }
+        //         }
+        //         if (data.userResponse === 'angry') {
+        //             if (this.angryWeekCount) {
+        //                 this.angryWeekCount++;
+        //             } else {
+        //                 this.angryWeekCount = 1
+        //             }
+        //             this.angryWeekCountArray[weekDay] = this.angryWeekCount;
+        //             if (angryCount) {
+        //                 angryCount++;
+        //             } else {
+        //                 angryCount = 1
+        //             }
+
+
+        //             let index = 0, flag = false;
+        //             for (let i = 0; i <= this.responseArray.length; i++) {
+        //                 if (this.responseArray[i]) {
+        //                     if (data.key == this.responseArray[i].key) {
+        //                         // this.responseArray[i] = data;
+        //                         index = i;
+        //                         flag = true;
+        //                     }
+        //                 }
+        //             }
+        //             if (!flag) {
+        //                 this.responseArray.push(data);
+        //             } else {
+        //                 this.responseArray[index] = data;
+        //                 index = 0;
+        //                 flag = false;
+        //             }
+        //             this.clicksObject['angry'] = angryCount;
+        //         }
+        //         if (data.userResponse === 'moderat') {
+        //             if (this.moderateWeekCount) {
+        //                 this.moderateWeekCount++;
+        //             } else {
+        //                 this.moderateWeekCount = 1;
+        //             }
+        //             this.moderatWeekCountArray[weekDay] = this.moderateWeekCount;
+        //             if (moderatCount) {
+        //                 moderatCount++;
+        //             } else {
+        //                 moderatCount = 1
+        //             }
+        //             this.clicksObject['moderat'] = moderatCount;
+
+
+        //             let index = 0, flag = false;
+        //             for (let i = 0; i <= this.responseArray.length; i++) {
+        //                 if (this.responseArray[i]) {
+        //                     if (data.key == this.responseArray[i].key) {
+        //                         // this.responseArray[i] = data;
+        //                         index = i;
+        //                         flag = true;
+        //                     }
+        //                 }
+        //             }
+        //             if (!flag) {
+        //                 this.responseArray.push(data);
+        //             } else {
+        //                 this.responseArray[index] = data;
+        //                 index = 0;
+        //                 flag = false;
+        //             }
+
+        //         }
+        //     });
+        //     this.setState({
+        //         moderatWeekCountArray: [...this.moderatWeekCountArray],
+        //         happyWeekCountArray: [...this.happyWeekCountArray],
+        //         angryWeekCountArray: [...this.angryWeekCountArray],
+        //         countClicks: this.clicksObject,
+        //         responseArray: this.responseArray.slice(0, 10)
+        //     }, function () {
+        //         console.log('this.state.countClick: ', this.state.countClicks);
+        //         this.moderatWeekCountArray = [];
+        //         this.happyWeekCountArray = [];
+        //         this.angryWeekCountArray = [];
+        //         this.moderateWeekCount = 0;
+        //         this.angryWeekCount = 0;
+        //         this.happyWeekCount = 0;
+        //         this.clicksObject = {};
+        //     });
+        // }
     }
     calculateResponsesMonthlyWise = (array) => {
-        console.log('this: /**/*/*/*/*/*/*/ ', this);
+        console.log('this: /**/*/*/*/*/*/*/ array.length', array.length);
         if (array !== undefined) {
             console.log('Before forEach Calculation Done: ', this.happyMonthCountArray, this.angryMonthCountArray, this.moderatMonthCountArray);
             array.forEach((data, i) => {
@@ -362,6 +414,9 @@ class Home extends Component {
                 this.happyMonthCount = this.happyMonthCountArray[date];
                 this.moderateMonthCount = this.moderatMonthCountArray[date];
                 this.angryMonthCount = this.angryMonthCountArray[date];
+                let angryCount = this.clicksObject['angry'];
+                let happyCount = this.clicksObject['happy'];
+                let moderatCount = this.clicksObject['moderat'];
                 if (data.userResponse === 'satisfied') {
                     if (this.happyMonthCount) {
                         this.happyMonthCount++;
@@ -369,6 +424,30 @@ class Home extends Component {
                         this.happyMonthCount = 1
                     }
                     this.happyMonthCountArray[date] = this.happyMonthCount;
+                    if (happyCount) {
+                        happyCount++;
+                    } else {
+                        happyCount = 1
+                    }
+                    this.clicksObject['happy'] = happyCount;
+                    let index = 0, flag = false;
+                    for (let i = 0; i <= this.responseArray.length; i++) {
+                        if (this.responseArray[i]) {
+                            if (data.key == this.responseArray[i].key) {
+                                // this.responseArray[i] = data;
+                                index = i;
+                                flag = true;
+                            }
+                        }
+                    }
+                    if (!flag && (data.message || data.audioURL)) {
+
+                        this.responseArray.push(data);
+                    } else {
+                        this.responseArray[index] = data;
+                        index = 0;
+                        flag = false;
+                    }
                 }
                 if (data.userResponse === 'angry') {
                     if (this.angryMonthCount) {
@@ -377,6 +456,30 @@ class Home extends Component {
                         this.angryMonthCount = 1
                     }
                     this.angryMonthCountArray[date] = this.angryMonthCount;
+
+                    if (angryCount) {
+                        angryCount++;
+                    } else {
+                        angryCount = 1
+                    }
+                    let index = 0, flag = false;
+                    for (let i = 0; i <= this.responseArray.length; i++) {
+                        if (this.responseArray[i]) {
+                            if (data.key == this.responseArray[i].key) {
+                                // this.responseArray[i] = data;
+                                index = i;
+                                flag = true;
+                            }
+                        }
+                    }
+                    if (!flag && (data.message || data.audioURL)) {
+                        this.responseArray.push(data);
+                    } else {
+                        this.responseArray[index] = data;
+                        index = 0;
+                        flag = false;
+                    }
+                    this.clicksObject['angry'] = angryCount;
                 }
                 if (data.userResponse === 'moderat') {
                     if (this.moderateMonthCount) {
@@ -385,13 +488,39 @@ class Home extends Component {
                         this.moderateMonthCount = 1;
                     }
                     this.moderatMonthCountArray[date] = this.moderateMonthCount;
+
+                    if (moderatCount) {
+                        moderatCount++;
+                    } else {
+                        moderatCount = 1
+                    }
+                    this.clicksObject['moderat'] = moderatCount;
+                    let index = 0, flag = false;
+                    for (let i = 0; i <= this.responseArray.length; i++) {
+                        if (this.responseArray[i]) {
+                            if (data.key == this.responseArray[i].key) {
+                                // this.responseArray[i] = data;
+                                index = i;
+                                flag = true;
+                            }
+                        }
+                    }
+                    if (!flag && (data.message || data.audioURL)) {
+                        this.responseArray.push(data);
+                    } else {
+                        this.responseArray[index] = data;
+                        index = 0;
+                        flag = false;
+                    }
                 }
             });
             console.log('after forEach Calculation Done: ', this.happyMonthCountArray, this.angryMonthCountArray, this.moderatMonthCountArray);
             this.setState({
                 moderatMonthCountArray: [...this.moderatMonthCountArray],
                 happyMonthCountArray: [...this.happyMonthCountArray],
-                angryMonthCountArray: [...this.angryMonthCountArray]
+                angryMonthCountArray: [...this.angryMonthCountArray],
+                countClicks: this.clicksObject,
+                responseArray: this.responseArray.slice(0, 10),
             }, function () {
                 this.moderatMonthCountArray = [];
                 this.happyMonthCountArray = [];
@@ -399,55 +528,35 @@ class Home extends Component {
                 this.moderateMonthCount = 0;
                 this.angryMonthCount = 0;
                 this.happyMonthCount = 0;
+                this.clicksObject = {};
                 console.log('incallback forEach Calculation Done: ', this.happyMonthCountArray, this.angryMonthCountArray, this.moderatMonthCountArray);
             });
         }
     }
-    calculateResponsesWeeklyWise = (array) => {
-        if (array !== undefined) {
+    callPaging = () => {
+        if (!this.state.stopPaging) {
 
-            array.forEach((data, i) => {
-                let weekDay = new Date(data.timeStamp).getDay();
-                this.happyWeekCount = this.happyWeekCountArray[weekDay];
-                this.moderateWeekCount = this.moderatWeekCountArray[weekDay];
-                this.angryWeekCount = this.angryWeekCountArray[weekDay];
-                if (data.userResponse === 'satisfied') {
-                    if (this.happyWeekCount) {
-                        this.happyWeekCount++;
-                    } else {
-                        this.happyWeekCount = 1
+            let scrollTop = document.documentElement.scrollTop;
+            let scrollHeight = document.documentElement.scrollHeight;
+            let offsetHeight = document.documentElement.clientHeight;
+            let contentHeight = scrollHeight - offsetHeight;
+            let flag = false, { responseArrayIterations } = this.state, index = 0;
+            if (contentHeight <= scrollTop) {
+                for (let i = responseArrayIterations; i <= responseArrayIterations + 5; i++) {
+                    if (this.responseArray[i] == undefined) {
+                        flag = true;
+                        index = i;
                     }
-                    this.happyWeekCountArray[weekDay] = this.happyWeekCount;
                 }
-                if (data.userResponse === 'angry') {
-                    if (this.angryWeekCount) {
-                        this.angryWeekCount++;
-                    } else {
-                        this.angryWeekCount = 1
-                    }
-                    this.angryWeekCountArray[weekDay] = this.angryWeekCount;
+                if (flag) {
+                    this.setState({ responseArray: [...this.state.responseArray, ...this.responseArray.slice(responseArrayIterations, index)], stopPaging: true });
+                } else {
+                    this.setState({
+                        responseArray: [...this.state.responseArray, ...this.responseArray.slice(responseArrayIterations, responseArrayIterations + 10)],
+                        responseArrayIterations: this.state.responseArrayIterations + 5
+                    })
                 }
-                if (data.userResponse === 'moderat') {
-                    if (this.moderateWeekCount) {
-                        this.moderateWeekCount++;
-                    } else {
-                        this.moderateWeekCount = 1;
-                    }
-                    this.moderatWeekCountArray[weekDay] = this.moderateWeekCount;
-                }
-            });
-            this.setState({
-                moderatWeekCountArray: [...this.moderatWeekCountArray],
-                happyWeekCountArray: [...this.happyWeekCountArray],
-                angryWeekCountArray: [...this.angryWeekCountArray]
-            }, function () {
-                this.moderatWeekCountArray = [];
-                this.happyWeekCountArray = [];
-                this.angryWeekCountArray = [];
-                this.moderateWeekCount = 0;
-                this.angryWeekCount = 0;
-                this.happyWeekCount = 0
-            });
+            }
         }
     }
 
@@ -491,24 +600,10 @@ class Home extends Component {
                     }
                     else {
                         this.happyCount = 1
-                    }   
+                    }
                     this.happyHourCountArray[timeHours] = this.happyCount
                 }
             });
-            for (let i = 0; i <= 23; i++) {
-                if (this.angryHourCountArray[i] === undefined) {
-                    this.angryHourCountArray[i] = 0;
-                }
-                if (this.moderateHourCountArray[i] === undefined) {
-                    this.moderateHourCountArray[i] = 0;
-                }
-                if (this.happyHourCountArray[i] === undefined) {
-                    this.happyHourCountArray[i] = 0;
-                }
-                // this.angryHourCountArray[i] = 0;
-                // this.moderateHourCountArray[i] = 0;
-                // this.happyHourCountArray[i] = 0;
-            }
             this.setState({
                 happyHourCountArray: [...this.happyHourCountArray],
                 moderateHourCountArray: [...this.moderateHourCountArray],
@@ -525,6 +620,12 @@ class Home extends Component {
         }
     }
     dateHandler = (e) => {
+        this.setState({ isProgress: true, stopPaging: false, countClicks: {}, responseArray: [], date: e.target.value });
+        this.responseArray = [];
+        this.timeRef = setTimeout(() => {
+            this.setState({ isProgress: false });
+            clearTimeout(this.timeRef);
+        }, 2000);
         let date = e.target.value;
         let formatedDate = `${date.slice(8, 10)}-${date.slice(5, 7)}-${date.slice(0, 4)}`;
         console.log(formatedDate);
@@ -536,6 +637,12 @@ class Home extends Component {
         this.iteration = 0;
     }
     weeklyDateHandler = (e) => {
+        this.setState({ isProgress: true, stopPaging: false, countClicks: {}, responseArray: [], date: e.target.value });
+        this.responseArray = [];
+        this.timeRef = setTimeout(() => {
+            this.setState({ isProgress: false });
+            clearTimeout(this.timeRef);
+        }, 2000);
         this.props.clearWeeklyArray();
         let oldDate = e.target.value;
         let formatedDate = `${oldDate.slice(8, 10)}-${oldDate.slice(5, 7)}-${oldDate.slice(0, 4)}`;
@@ -560,22 +667,57 @@ class Home extends Component {
         this.datesArray = [];
         this.iteration = 0;
     }
-
-
     render() {
-        console.log('this.state.responseArray ', this.state.responseArray);
+        console.log("this.clickCount///////////////////: ", this.state.countClicks);
+        if (this.state.isProgress) {
+            return (
+                <div style={{
+                    height: '100vh',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center'
+                }}>
+                    <Loader type="Bars" color="#somecolor" height={80} width={80} />
+                </div>
+            )
+        }
         return (
             <Navbar history={this.props.history} changeHandler={(event) => this.handleChange(event)} selectedBranch={this.state.selectedBranch}>
                 {
                     this.state.selectedBranch === "select branch" ? <div><h1>Please Select Your Branch</h1></div> :
                         <div style={{ backgroundColor: "#f5f5f5" }} >
+                            <Grid container direction="row" justify="center">
+                                <Grid item md={4} xs={10}>
+                                    <h1 style={{
+                                        textAlign: 'center',
+                                        marginTop: '0.5em',
+                                        color: "lightslategrey"
+                                    }}>
+                                        Select Date
+                                    </h1>
+                                    <Card>
+                                        <CardContent style={{ textAlign: 'center' }}>
+                                            <TextField
+                                                id="date"
+                                                type="date"
+                                                defaultValue="Select Date"
+                                                value={this.state.date}
+                                                // InputLabelProps={{
+                                                //   shrink: true,
+                                                // }}
+                                                onChange={(e) => this.dateHandler(e)}
+                                            />
+                                        </CardContent>
+                                    </Card>
+                                </Grid>
+                            </Grid>
                             <Grid container direction={'row'} justify="center"  >
                                 <Grid item md={4} xs={10} style={{ padding: 15 }}  >
                                     <Card >
                                         <CardContent style={{ display: "flex", flexDirection: "row", justifyContent: "space-between" }} >
                                             <img src={require('./assets/happy.png')} height='125px' width='125px' />
-                                            <div style={{ display: "flex", flexDirection: "column", justifyContent: "center" }} >
-                                                <Typography variant="caption" style={{ textAlign: 'center' }} gutterBottom>
+                                            <div style={{ textAlign: 'center', display: "flex", flexDirection: "column", justifyContent: "center" }} >
+                                                <Typography variant="caption" gutterBottom>
                                                     Happy Clicks
                                                 </Typography>
                                                 <Typography variant="display2" style={{ textAlign: "center" }} gutterBottom>
@@ -590,8 +732,8 @@ class Home extends Component {
                                     <Card >
                                         <CardContent style={{ display: "flex", flexDirection: "row", justifyContent: "space-between" }} >
                                             <img src={require('./assets/moderate.png')} height='125px' width='125px' />
-                                            <div style={{ display: "flex", flexDirection: "column", justifyContent: "center" }} >
-                                                <Typography variant="caption" style={{ textAlign: 'center' }} gutterBottom>
+                                            <div style={{ textAlign: 'center', display: "flex", flexDirection: "column", justifyContent: "center" }} >
+                                                <Typography variant="caption" gutterBottom>
                                                     Moderate Clicks
                                     </Typography>
                                                 <Typography variant="display2" style={{ textAlign: "center" }} gutterBottom>
@@ -606,10 +748,10 @@ class Home extends Component {
                                     <Card >
                                         <CardContent style={{ display: "flex", flexDirection: "row", justifyContent: "space-between" }} >
                                             <img src={require('./assets/__sad.png')} height='125px' width='125px' />
-                                            <div style={{ display: "flex", flexDirection: "column", justifyContent: "center" }} >
-                                                <Typography variant="caption" gutterBottom style={{ textAlign: 'center' }}>
+                                            <div style={{ textAlign: 'center', display: "flex", flexDirection: "column", justifyContent: "center" }} >
+                                                <Typography variant="caption" gutterBottom>
                                                     Angry Clicks
-                                                </Typography>
+                                    </Typography>
                                                 <Typography variant="display2" style={{ textAlign: "center" }} gutterBottom>
                                                     {this.state.countClicks['angry'] || 0}
                                                 </Typography>
@@ -621,112 +763,61 @@ class Home extends Component {
                             </Grid>
 
                             <Grid container justify='center' direction={'row'}>
-                                <Grid item md={12} xs={10} style={{ padding: 15 }}>
-                                    <Card >
-                                        <CardContent style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-                                            <LineChart heading={"Hourly Response"}
+                                <Grid item md={8} xs={10} style={{ padding: 15 }}>
+                                    {/* <Card > */}
+                                    {/* <CardContent style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}> */}
+                                    {/* <BarChart heading={"Weekly Response"}
                                                 chartData={{
-                                                    labels: ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'],
+                                                    labels: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], //x-axis label array
                                                     datasets: [
                                                         {
-                                                            label: "Happy ",
-                                                            // fill: false,
-                                                            // lineTension: 0.1,
-                                                            backgroundColor: "transparent",
-                                                            borderColor: "#4FAB56", // The main line color
-                                                            // borderCapStyle: 'square',
-                                                            // borderDash: [], // try [5, 15] for instance
-                                                            // borderDashOffset: 0.0,
-                                                            // borderJoinStyle: 'miter',
-                                                            // pointBorderColor: "white",
-                                                            // pointBackgroundColor: "#4FAB56",
-                                                            // pointBorderWidth: 1,
-                                                            // pointHoverRadius: 8,
-                                                            // pointHoverBackgroundColor: "#4FAB56",
-                                                            // pointHoverBorderColor: "#4FAB56x",
-                                                            // pointHoverBorderWidth: 2,
-                                                            // pointRadius: 4,
-                                                            // pointHitRadius: 10,
-                                                            // notice the gap in the data and the spanGaps: true
-                                                            data: this.state.happyHourCountArray,
-                                                            // spanGaps: true,
-                                                        }, {
-                                                            label: "Moderat",
-                                                            // fill: true,
-                                                            // lineTension: 0.1,
-                                                            backgroundColor: "transparent",
-                                                            borderColor: "#F99D2C",
-                                                            // borderCapStyle: 'butt',
-                                                            // borderDash: [],
-                                                            // borderDashOffset: 0.0,
-                                                            // borderJoinStyle: 'miter',
-                                                            // pointBorderColor: "white",
-                                                            // pointBackgroundColor: "#F99D2C",
-                                                            // pointBorderWidth: 1,
-                                                            // pointHoverRadius: 8,
-                                                            // pointHoverBackgroundColor: "#F99D2C",
-                                                            // pointHoverBorderColor: "#F99D2C",
-                                                            // pointHoverBorderWidth: 2,
-                                                            // pointRadius: 4,
-                                                            // pointHitRadius: 10,
-                                                            // notice the gap in the data and the spanGaps: false
-                                                            data: this.state.moderateHourCountArray,
-                                                            // spanGaps: false,
+                                                            label: 'Happy',
+                                                            data: this.state.happyWeekCountArray,
+                                                            backgroundColor: "#4FAB56"
                                                         },
                                                         {
-                                                            label: "Angry",
-                                                            // fill: true,
-                                                            // lineTension: 0.1,
-                                                            backgroundColor: "transparent",
-                                                            borderColor: "#E83E3B",
-                                                            // borderCapStyle: 'butt',
-                                                            // borderDash: [],
-                                                            // borderDashOffset: 0.0,
-                                                            // borderJoinStyle: 'miter',
-                                                            // pointBorderColor: "white",
-                                                            // pointBackgroundColor: "#E83E3B",
-                                                            // pointBorderWidth: 1,
-                                                            // pointHoverRadius: 8,
-                                                            // pointHoverBackgroundColor: "#E83E3B",
-                                                            // pointHoverBorderColor: "#E83E3B",
-                                                            // pointHoverBorderWidth: 2,
-                                                            // pointRadius: 4,
-                                                            // pointHitRadius: 10,
-                                                            // notice the gap in the data and the spanGaps: false
-                                                            data: this.state.angryHourCountArray,
-                                                            // spanGaps: false,
+                                                            label: 'Moderate',
+                                                            data: this.state.moderatWeekCountArray,
+                                                            backgroundColor: '#F99D2C'
+                                                        },
+                                                        {
+                                                            label: 'Angry',
+                                                            data: this.state.angryWeekCountArray,
+                                                            backgroundColor: "#E83E3B"
                                                         }
                                                     ]
-                                                    // labels: ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'], //x-axis label array
-                                                    // datasets: [
-                                                    //     {
-                                                    //         label: 'Happy',
-                                                    //         data: this.state.happyHourCountArray,
-                                                    //         backgroundColor: "#4FAB56"
-                                                    //     }
-                                                    //     {
-                                                    //         label: 'Moderate',
-                                                    //         data: this.state.moderateHourCountArray,
-                                                    //         backgroundColor: '#F99D2C'
-                                                    //     },
-                                                    //     {
-                                                    //         label: 'Angry',
-                                                    //         data: this.state.angryHourCountArray,
-                                                    //         backgroundColor: "#E83E3B"
-                                                    //     }
-                                                    // ]
                                                 }}
-                                            />
-                                        </CardContent>
-                                    </Card>
+                                            /> */}
+                                    {/* <BarChart heading={"Hourly Response"}
+                                                chartData={{
+                                                    labels: ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'], //x-axis label array
+                                                    datasets: [
+                                                        {
+                                                            label: 'Happy',
+                                                            data: this.state.happyHourCountArray,
+                                                            backgroundColor: "#4FAB56"
+                                                        },
+                                                        {
+                                                            label: 'Moderate',
+                                                            data: this.state.moderateHourCountArray,
+                                                            backgroundColor: '#F99D2C'
+                                                        },
+                                                        {
+                                                            label: 'Angry',
+                                                            data: this.state.angryHourCountArray,
+                                                            backgroundColor: "#E83E3B"
+                                                        }
+                                                    ]
+                                                }}
+                                            /> */}
+                                    {/* </CardContent> */}
+                                    {/* </Card> */}
                                 </Grid>
-                            </Grid>
-                            <Grid container justify='center' direction='row'>
-                                <Grid item md={6} xs={10} style={{ padding: 15 }}>
+                                <Grid item md={4} xs={10} style={{ padding: 15 }}>
                                     <Card >
                                         <CardContent style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
                                             <DoughnutChart
-                                                heading="Total Response"
+                                                heading={"Clicks Response"}
                                                 chartData={{
                                                     labels: ['Happy', 'Moderate', 'Angry'],
                                                     datasets: [
@@ -750,134 +841,10 @@ class Home extends Component {
                                         </CardContent>
                                     </Card>
                                 </Grid>
-                                <Grid item md={6} xs={10} style={{ padding: 15, height: '100%' }}>
-                                    <Card CardContent style={{ height: '100%' }}>
-                                        <CardContent style={{ height: '100%' }}>
-                                            <Typography variant="subheading" style={{ textAlign: "center" }} gutterBottom>
-                                                PAIN POINTS
-                                            </Typography>
-                                            <div>
-                                                <div>
-                                                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                                        <Typography variant="caption">Waiting Time</Typography>
-                                                        <div>
-                                                            {this.state.angryReasonsCount['Waiting Time']}
-                                                        </div>
-                                                    </div>
-                                                    <Progress size="tiny" percent={this.state.angryReasonsCount['Waiting Time'] + 5} color='red' />
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                                    <Typography variant="caption">Enviroment</Typography>
-                                                    <div>
-                                                        {this.state.angryReasonsCount['Enviroment']}
-                                                    </div>
-                                                </div>
-                                                <Progress size="tiny" percent={this.state.angryReasonsCount['Enviroment'] + 5} color='brown' />
-                                            </div>
-                                            <div>
-                                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                                    <Typography variant="caption">Attitude</Typography>
-                                                    <div>
-                                                        {this.state.angryReasonsCount['Attitude']}
-                                                    </div>
-                                                </div>
-                                                <Progress size="tiny" percent={this.state.angryReasonsCount['Attitude'] + 5} color='teal' />
-                                            </div>
-                                            <div>
-                                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                                    <Typography variant="caption">Bad Service</Typography>
-                                                    <div>
-                                                        {this.state.angryReasonsCount['Bad Service']}
-                                                    </div>
-                                                </div>
-                                                <Progress size="tiny" percent={this.state.angryReasonsCount['Bad Service']} color='blue' />
-                                            </div>
-                                        </CardContent>
-                                    </Card>
-                                </Grid>
-                            </Grid>
-                            <Grid container justify="center" direction="row">
-                                <Grid item md={12} xs={10} style={{ padding: 15 }}>
-                                    <Card>
-                                        <CardContent>
-                                            <h3>OPEN FEEDBACK</h3>
-                                        </CardContent>
-                                        {
-                                            this.state.responseArray.map((data) => {
-                                                console.log('Images: ', Images[data.userResponse]);
-                                                console.log('dDDDDDDDDdddate: ', Date(data.timeStamp));
-
-                                                return (
-                                                    <CardContent>
-                                                        <div style={{ display: 'flex', alignItems: 'flex-start' }}>
-                                                            <div>
-                                                                <img src={require(`${Images[data.userResponse]}`)} className='openFeedbackImg' />
-                                                            </div>
-                                                            <div style={{ marginLeft: '15px' }}>
-                                                                {
-                                                                    data.message && data.message.length ?
-                                                                        <div style={{
-                                                                            backgroundColor: 'lightgray',
-                                                                            padding: '10px',
-                                                                            borderRadius: '10px',
-                                                                            fontSize: '13px'
-                                                                        }}>
-                                                                            <span>
-                                                                                {data.message}
-                                                                            </span>
-                                                                        </div>
-                                                                        :
-                                                                        null
-                                                                }
-                                                                <div style={{ display: 'flex', alignItems: 'flex-end', alignSelf: 'flex-end' }}>
-                                                                    <div style={{ display: 'flex', alignItems: 'flex-end' }}>
-                                                                        <span style={{ color: '#a9a9a9', fontSize: '10.5px' }}>
-                                                                            {timeAndDateformatter(data.timeStamp)};
-                                                                    </span>
-                                                                        <span style={{ display: 'inline-flex', alignItems: 'center' }}>
-                                                                            <Location style={{ color: "#a9a9a9", fontSize: '15px' }} />
-                                                                            <span style={{ fontWeight: 'bold', color: '#a9a9a9', fontSize: '13px' }}>
-                                                                                {data.location}
-                                                                            </span>
-                                                                        </span>
-                                                                    </div>
-
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div >
-                                                            {
-                                                                data.audioURL ?
-                                                                    <AudioPlayer audioURL={data.audioURL} />
-                                                                    :
-                                                                    null
-
-                                                            }
-                                                        </div>
-
-                                                    </CardContent>
-                                                )
-                                            })
-                                        }
-                                    </Card>
-                                </Grid>
                             </Grid>
                             {/* <Grid container justify='center' direction={'row'}>
                                 <Grid item md={10} xs={10} style={{ padding: 15 }}>
                                     <Card >
-                                        <CardContent>
-                                            <TextField
-                                                id="date"
-                                                type="date"
-                                                defaultValue="Select Date"
-                                                // InputLabelProps={{
-                                                //   shrink: true,
-                                                // }}
-                                                onChange={(e) => this.weeklyDateHandler(e)}
-                                            />
-                                        </CardContent>
                                         <CardContent style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
                                             <BarChart heading={"Weekly Response"}
                                                 chartData={{
@@ -904,21 +871,10 @@ class Home extends Component {
                                         </CardContent>
                                     </Card>
                                 </Grid>
-                            </Grid>
+                            </Grid> */}
                             <Grid container justify='center' direction={'row'}>
                                 <Grid item md={10} xs={10} style={{ padding: 15 }}>
                                     <Card >
-                                        <CardContent>
-                                            <TextField
-                                                id="date"
-                                                type="date"
-                                                defaultValue="Select Date"
-                                                // InputLabelProps={{
-                                                //   shrink: true,
-                                                // }}
-                                                onChange={(e) => this.dateHandler(e)}
-                                            />
-                                        </CardContent>
                                         <CardContent style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
                                             <BarChart heading={"Monthly Response"}
                                                 chartData={{
@@ -944,8 +900,73 @@ class Home extends Component {
                                             />
                                         </CardContent>
                                     </Card>
-                                </Grid> //Month and Weekly Data 
-                            </Grid> */}
+                                </Grid>
+                            </Grid>
+                            <Grid container justify="center" direction="row">
+                                <Grid item md={12} xs={10} style={{ padding: 15 }}>
+                                    <Card>
+                                        <CardContent>
+                                            <h3>OPEN FEEDBACK</h3>
+                                        </CardContent>
+                                        {
+                                            this.state.responseArray.map((data) => {
+                                                if (data.message || data.audioURL) {
+                                                    return (
+                                                        <CardContent>
+                                                            <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+                                                                <div>
+                                                                    <img src={require(`${Images[data.userResponse]}`)} className='openFeedbackImg' />
+                                                                </div>
+                                                                <div style={{ marginLeft: '15px', alignSelf: 'center' }}>
+                                                                    {
+                                                                        data.message && data.message.length ?
+                                                                            <div style={{
+                                                                                backgroundColor: 'lightgray',
+                                                                                padding: '10px',
+                                                                                borderRadius: '10px',
+                                                                                fontSize: '13px'
+                                                                            }}>
+                                                                                <span>
+                                                                                    {data.message}
+                                                                                </span>
+                                                                            </div>
+                                                                            :
+                                                                            null
+                                                                    }
+                                                                    <div style={{ display: 'flex', alignItems: 'flex-end', alignSelf: 'flex-end' }}>
+                                                                        <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+                                                                            <span style={{ color: '#a9a9a9', fontSize: '10.5px' }}>
+                                                                                {timeAndDateformatter(data.timeStamp)};
+                                                                    </span>
+                                                                            <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+                                                                                <Location style={{ color: "#a9a9a9", fontSize: '15px' }} />
+                                                                                <span style={{ fontWeight: 'bold', color: '#a9a9a9', fontSize: '13px' }}>
+                                                                                    {data.location}
+                                                                                </span>
+                                                                            </span>
+                                                                        </div>
+
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div >
+                                                                {
+                                                                    data.audioURL ?
+                                                                        <AudioPlayer audioURL={data.audioURL} />
+                                                                        :
+                                                                        null
+
+                                                                }
+                                                            </div>
+
+                                                        </CardContent>
+                                                    )
+                                                }
+                                            })
+                                        }
+                                    </Card>
+                                </Grid>
+                            </Grid>
                         </div>
                 }
             </Navbar>
@@ -966,7 +987,8 @@ const mapStateToPorps = (state) => {
         state: state.dbReducer,
         iteration: state.dbReducer.iteration,
         currentDate: state.dbReducer.currentDate,
-        selectedBranch: state.dbReducer.currentBranch
+        selectedBranch: state.dbReducer.currentBranch,
+        isProgress: state.dbReducer.isProgress
     }
 }
 const mapDispatchToPorps = (dispatch) => {
@@ -981,4 +1003,4 @@ const mapDispatchToPorps = (dispatch) => {
         clearWeeklyArray: () => dispatch(DBActions.clearWeeklyArray()),
     }
 }
-export default connect(mapStateToPorps, mapDispatchToPorps)(Home);
+export default connect(mapStateToPorps, mapDispatchToPorps)(Monthly);
