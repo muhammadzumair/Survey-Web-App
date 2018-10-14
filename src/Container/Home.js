@@ -491,7 +491,7 @@ class Home extends Component {
                     }
                     else {
                         this.happyCount = 1
-                    }   
+                    }
                     this.happyHourCountArray[timeHours] = this.happyCount
                 }
             });
@@ -722,7 +722,7 @@ class Home extends Component {
                                 </Grid>
                             </Grid>
                             <Grid container justify='center' direction='row'>
-                                <Grid item md={6} xs={10} style={{ padding: 15 }}>
+                                <Grid item md={4} xs={10} style={{ padding: 15 }}>
                                     <Card >
                                         <CardContent style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
                                             <DoughnutChart
@@ -750,7 +750,7 @@ class Home extends Component {
                                         </CardContent>
                                     </Card>
                                 </Grid>
-                                <Grid item md={6} xs={10} style={{ padding: 15, height: '100%' }}>
+                                <Grid item md={8} xs={10} style={{ padding: 15 }}>
                                     <Card CardContent style={{ height: '100%' }}>
                                         <CardContent style={{ height: '100%' }}>
                                             <Typography variant="subheading" style={{ textAlign: "center" }} gutterBottom>
@@ -792,7 +792,7 @@ class Home extends Component {
                                                         {this.state.angryReasonsCount['Bad Service']}
                                                     </div>
                                                 </div>
-                                                <Progress size="tiny" percent={this.state.angryReasonsCount['Bad Service']} color='blue' />
+                                                <Progress size="tiny" percent={this.state.angryReasonsCount['Bad Service'] + 5} color='blue' />
                                             </div>
                                         </CardContent>
                                     </Card>
@@ -806,59 +806,57 @@ class Home extends Component {
                                         </CardContent>
                                         {
                                             this.state.responseArray.map((data) => {
-                                                console.log('Images: ', Images[data.userResponse]);
-                                                console.log('dDDDDDDDDdddate: ', Date(data.timeStamp));
-
-                                                return (
-                                                    <CardContent>
-                                                        <div style={{ display: 'flex', alignItems: 'flex-start' }}>
-                                                            <div>
-                                                                <img src={require(`${Images[data.userResponse]}`)} className='openFeedbackImg' />
-                                                            </div>
-                                                            <div style={{ marginLeft: '15px' }}>
-                                                                {
-                                                                    data.message && data.message.length ?
-                                                                        <div style={{
-                                                                            backgroundColor: 'lightgray',
-                                                                            padding: '10px',
-                                                                            borderRadius: '10px',
-                                                                            fontSize: '13px'
-                                                                        }}>
-                                                                            <span>
-                                                                                {data.message}
+                                                if (data.message || data.audioURL) {
+                                                    return (
+                                                        <CardContent>
+                                                            <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+                                                                <div>
+                                                                    <img src={require(`${Images[data.userResponse]}`)} className='openFeedbackImg' />
+                                                                </div>
+                                                                <div style={{ marginLeft: '15px' }}>
+                                                                    {
+                                                                        data.message && data.message.length ?
+                                                                            <div style={{
+                                                                                backgroundColor: 'lightgray',
+                                                                                padding: '10px',
+                                                                                borderRadius: '10px',
+                                                                                fontSize: '13px'
+                                                                            }}>
+                                                                                <span>
+                                                                                    {data.message}
+                                                                                </span>
+                                                                            </div>
+                                                                            :
+                                                                            null
+                                                                    }
+                                                                    <div style={{ display: 'flex', alignItems: 'flex-end', alignSelf: 'flex-end' }}>
+                                                                        <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+                                                                            <span style={{ color: '#a9a9a9', fontSize: '10.5px' }}>
+                                                                                {timeAndDateformatter(data.timeStamp)};
+                                                                    </span>
+                                                                            <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+                                                                                <Location style={{ color: "#a9a9a9", fontSize: '15px' }} />
+                                                                                <span style={{ fontWeight: 'bold', color: '#a9a9a9', fontSize: '13px' }}>
+                                                                                    {data.location}
+                                                                                </span>
                                                                             </span>
                                                                         </div>
+
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div >
+                                                                {
+                                                                    data.audioURL ?
+                                                                        <AudioPlayer audioURL={data.audioURL} />
                                                                         :
                                                                         null
                                                                 }
-                                                                <div style={{ display: 'flex', alignItems: 'flex-end', alignSelf: 'flex-end' }}>
-                                                                    <div style={{ display: 'flex', alignItems: 'flex-end' }}>
-                                                                        <span style={{ color: '#a9a9a9', fontSize: '10.5px' }}>
-                                                                            {timeAndDateformatter(data.timeStamp)};
-                                                                    </span>
-                                                                        <span style={{ display: 'inline-flex', alignItems: 'center' }}>
-                                                                            <Location style={{ color: "#a9a9a9", fontSize: '15px' }} />
-                                                                            <span style={{ fontWeight: 'bold', color: '#a9a9a9', fontSize: '13px' }}>
-                                                                                {data.location}
-                                                                            </span>
-                                                                        </span>
-                                                                    </div>
-
-                                                                </div>
                                                             </div>
-                                                        </div>
-                                                        <div >
-                                                            {
-                                                                data.audioURL ?
-                                                                    <AudioPlayer audioURL={data.audioURL} />
-                                                                    :
-                                                                    null
 
-                                                            }
-                                                        </div>
-
-                                                    </CardContent>
-                                                )
+                                                        </CardContent>
+                                                    )
+                                                }
                                             })
                                         }
                                     </Card>

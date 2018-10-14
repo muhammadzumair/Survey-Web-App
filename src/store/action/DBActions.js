@@ -2,21 +2,28 @@ import actionTypes from '../actionTypes';
 
 
 class DBActions {
-    static getDataDateWise(date, branch){
-        return{
+    static getDataDateWise(date, branch) {
+        return {
             type: actionTypes.GET_DATA_DATE_WISE_PROGRESS,
-            payload: {date,branch}
+            payload: { date, branch }
         }
     }
 
-    static clearMonthlyArray(){
-        return{
+    static logout(history) {
+        return {
+            type: actionTypes.LOGOUT_PROGRESS,
+            payload: history
+        }
+    }
+
+    static clearMonthlyArray() {
+        return {
             type: actionTypes.CLEAR_MONTHLY_ARRAY
         }
     }
-    
-    static clearWeeklyArray(){
-        return{
+
+    static clearWeeklyArray() {
+        return {
             type: actionTypes.CLEAR_WEEKLY_ARRAY
         }
     }
@@ -26,14 +33,14 @@ class DBActions {
             type: actionTypes.GET_HOURLY_DATA_FLAG_FALSE
         }
     }
-    static setCurrentBranch(branch){
-        return{
+    static setCurrentBranch(branch) {
+        return {
             type: actionTypes.SET_CURRENT_BRANCH,
             payload: branch
         }
     }
-    static loadBraches(){
-        return{
+    static loadBraches() {
+        return {
             type: actionTypes.LOAD_BRANCHES
         }
     }
@@ -61,19 +68,19 @@ class DBActions {
             payload: array
         }
     }
-    static incrementIteration(){
+    static incrementIteration() {
         return {
-            type:actionTypes.INCREMENT_ITERATION
+            type: actionTypes.INCREMENT_ITERATION
         }
     }
-    static resetIteration(){
-        return{
-            type:actionTypes.RESET_ITERATION
+    static resetIteration() {
+        return {
+            type: actionTypes.RESET_ITERATION
         }
     }
-    static getCurrentDate(){
+    static getCurrentDate() {
         return {
-            type:actionTypes.GET_CURRENT_DATE_PROGRESS
+            type: actionTypes.GET_CURRENT_DATE_PROGRESS
         }
     }
 }

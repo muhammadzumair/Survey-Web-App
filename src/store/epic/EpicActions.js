@@ -7,21 +7,21 @@ import DBActions from '../action/DBActions';
 import actionType from '../actionTypes';
 
 export default class EpicActions {
-
-    static getDataDateWise(action$){
+    
+    static getDataDateWise(action$) {
         return action$.ofType(actionTypes.GET_DATA_DATE_WISE_PROGRESS)
-                .mergeMap(({payload})=>{
-                    return Observable.fromPromise(FirebaseDB.getDataDateWise(payload.date, payload.branch))
-                    .map(data=>{
-                        return{
+            .mergeMap(({ payload }) => {
+                return Observable.fromPromise(FirebaseDB.getDataDateWise(payload.date, payload.branch))
+                    .map(data => {
+                        return {
                             type: actionTypes.GET_DATA_DATE_WISE_SUCCEED,
                             payload: data
                         }
                     })
-                    .catch(err=>{
-                        return Observable.of({type: actionTypes.GET_DATA_DATE_WISE_FAIL, payload: err.message});
+                    .catch(err => {
+                        return Observable.of({ type: actionTypes.GET_DATA_DATE_WISE_FAIL, payload: err.message });
                     })
-                })
+            })
     }
 
     static getHourlyData(action$) {

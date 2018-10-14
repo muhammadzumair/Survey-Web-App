@@ -14,18 +14,19 @@ export function checkUser() {
   return new Promise((res, rej) => {
     firebase.auth().onAuthStateChanged(user => {
       if (user) {
-          res(user)
+        res(user)
       }
-      else{
-          res(null)
+      else {
+        res(null)
       }
     });
   });
-  
+
 }
-export function sigInWithEmailAndPass(payload){
-  return firebase.auth().signInWithEmailAndPassword(payload.email,payload.pass);
+export function sigInWithEmailAndPass(payload) {
+  return firebase.auth().signInWithEmailAndPassword(payload.email, payload.pass);
 }
-export function signOutUser(){
+export function signOutUser(history) {
+  history.replace('/');
   return firebase.auth().signOut();
 }

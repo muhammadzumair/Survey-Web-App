@@ -10,6 +10,7 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import Divider from '@material-ui/core/Divider';
 import Appbar from './Appbar';
 import './Navbar.css';
+import AuthActions from "../store/action/AuthActions";
 
 const color = '#3f3f3f'
 const styles = {
@@ -50,6 +51,10 @@ class Navbar extends Component {
   }
 
   clicked = (name) => {
+    if (name === 'logout') {
+      this.props.logout(this.props.history);
+      return;
+    }
     let obj = this.state.colorObj;
     for (let i in obj) {
       obj[i] = '#6c6c6c'
@@ -116,6 +121,7 @@ const mapStateToProps = state => {
 };
 const mapDispatchToProps = dispatch => {
   return {
+    logout: (history) => dispatch(AuthActions.SignOutUser(history))
   };
 };
 export default connect(

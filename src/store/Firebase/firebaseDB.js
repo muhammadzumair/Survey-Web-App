@@ -40,8 +40,7 @@ export default class FirebaseDB {
                 array.push(item);
             });
             store.dispatch(DBActions.getRealTimeDataSucceed(array));
-        })
-            ;
+        });
     }
 
     static getWeeklyData(date, branch) {
@@ -98,6 +97,10 @@ export default class FirebaseDB {
                 payload: array,
             });
         })
+    }
+
+    static logout(history){
+        Fire.firestore()
     }
 
 }

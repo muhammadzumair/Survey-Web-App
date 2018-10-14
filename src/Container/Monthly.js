@@ -81,6 +81,7 @@ class Monthly extends Component {
         this.clicksObject = {};
         this.lastDate = 0;
         this.responseArray = [];
+        this.angryReasonsCount = {};
 
 
         this.state = {
@@ -101,7 +102,13 @@ class Monthly extends Component {
             responseArray: [],
             isProgress: false,
             responseArrayIterations: 10,
-            stopPaging: false
+            stopPaging: false,
+            angryReasonsCount: {
+                'Waiting Time': 0,
+                'Bad Service': 0,
+                'Enviroment': 0,
+                'Attitude': 0
+            }
         }
     }
 
@@ -409,6 +416,7 @@ class Monthly extends Component {
         console.log('this: /**/*/*/*/*/*/*/ array.length', array.length);
         if (array !== undefined) {
             console.log('Before forEach Calculation Done: ', this.happyMonthCountArray, this.angryMonthCountArray, this.moderatMonthCountArray);
+            // let { angryReasonsCount } = this.state;
             array.forEach((data, i) => {
                 let date = new Date(data.timeStamp).getDate();
                 this.happyMonthCount = this.happyMonthCountArray[date];
@@ -456,6 +464,14 @@ class Monthly extends Component {
                         this.angryMonthCount = 1
                     }
                     this.angryMonthCountArray[date] = this.angryMonthCount;
+
+                    //reasons
+
+                    if (this.angryReasonsCount[data.reason]) {
+                        this.angryReasonsCount[data.reason] += 1
+                    } else {
+                        this.angryReasonsCount[data.reason] = 1;
+                    }
 
                     if (angryCount) {
                         angryCount++;
@@ -521,6 +537,7 @@ class Monthly extends Component {
                 angryMonthCountArray: [...this.angryMonthCountArray],
                 countClicks: this.clicksObject,
                 responseArray: this.responseArray.slice(0, 10),
+                angryReasonsCount: this.angryReasonsCount
             }, function () {
                 this.moderatMonthCountArray = [];
                 this.happyMonthCountArray = [];
@@ -529,6 +546,7 @@ class Monthly extends Component {
                 this.angryMonthCount = 0;
                 this.happyMonthCount = 0;
                 this.clicksObject = {};
+                this.angryReasonsCount = {};
                 console.log('incallback forEach Calculation Done: ', this.happyMonthCountArray, this.angryMonthCountArray, this.moderatMonthCountArray);
             });
         }
@@ -761,9 +779,111 @@ class Monthly extends Component {
                                     </Card>
                                 </Grid>
                             </Grid>
-
                             <Grid container justify='center' direction={'row'}>
+                                <Grid item md={12} xs={10} style={{ padding: 15 }}>
+                                    <Card >
+                                        <CardContent style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                                            <BarChart heading={"Monthly Response"}
+                                                chartData={{
+                                                    labels: this.state.datesArray, //x-axis label array
+                                                    datasets: [
+                                                        {
+                                                            label: 'Happy',
+                                                            data: this.state.happyMonthCountArray,
+                                                            backgroundColor: "#4FAB56"
+                                                        },
+                                                        {
+                                                            label: 'Moderate',
+                                                            data: this.state.moderatMonthCountArray,
+                                                            backgroundColor: '#F99D2C'
+                                                        },
+                                                        {
+                                                            label: 'Angry',
+                                                            data: this.state.angryMonthCountArray,
+                                                            backgroundColor: "#E83E3B"
+                                                        }
+                                                    ]
+                                                }}
+                                            />
+                                        </CardContent>
+                                    </Card>
+                                </Grid>
+                            </Grid>
+                            <Grid container justify='center' direction={'row'}>
+                                <Grid item md={4} xs={10} style={{ padding: 15 }}>
+                                    <Card >
+                                        <CardContent style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                                            <DoughnutChart
+                                                heading={"Clicks Response"}
+                                                chartData={{
+                                                    labels: ['Happy', 'Moderate', 'Angry'],
+                                                    datasets: [
+                                                        {
+                                                            label: 'Population',
+                                                            data: [
+                                                                this.state.countClicks['happy'],
+                                                                this.state.countClicks['moderat'],
+                                                                this.state.countClicks['angry']
+                                                            ],
+                                                            backgroundColor: [
+                                                                '#4FAB56',
+                                                                '#F99D2C',
+                                                                '#E83E3B'
+
+                                                            ]
+                                                        }
+                                                    ]
+                                                }}
+                                            />
+                                        </CardContent>
+                                    </Card>
+                                </Grid>
                                 <Grid item md={8} xs={10} style={{ padding: 15 }}>
+                                    <Card CardContent style={{ height: '100%' }}>
+                                        <CardContent style={{ height: '100%' }}>
+                                            <Typography variant="subheading" style={{ textAlign: "center" }} gutterBottom>
+                                                PAIN POINTS
+                                            </Typography>
+                                            <div>
+                                                <div>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                                        <Typography variant="caption">Waiting Time</Typography>
+                                                        <div>
+                                                            {this.state.angryReasonsCount['Waiting Time']}
+                                                        </div>
+                                                    </div>
+                                                    <Progress size="tiny" percent={this.state.angryReasonsCount['Waiting Time'] + 5} color='red' />
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                                    <Typography variant="caption">Enviroment</Typography>
+                                                    <div>
+                                                        {this.state.angryReasonsCount['Enviroment']}
+                                                    </div>
+                                                </div>
+                                                <Progress size="tiny" percent={this.state.angryReasonsCount['Enviroment'] + 5} color='brown' />
+                                            </div>
+                                            <div>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                                    <Typography variant="caption">Attitude</Typography>
+                                                    <div>
+                                                        {this.state.angryReasonsCount['Attitude']}
+                                                    </div>
+                                                </div>
+                                                <Progress size="tiny" percent={this.state.angryReasonsCount['Attitude'] + 5} color='teal' />
+                                            </div>
+                                            <div>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                                    <Typography variant="caption">Bad Service</Typography>
+                                                    <div>
+                                                        {this.state.angryReasonsCount['Bad Service']}
+                                                    </div>
+                                                </div>
+                                                <Progress size="tiny" percent={this.state.angryReasonsCount['Bad Service'] + 5} color='blue' />
+                                            </div>
+                                        </CardContent>
+                                    </Card>
                                     {/* <Card > */}
                                     {/* <CardContent style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}> */}
                                     {/* <BarChart heading={"Weekly Response"}
@@ -813,34 +933,6 @@ class Monthly extends Component {
                                     {/* </CardContent> */}
                                     {/* </Card> */}
                                 </Grid>
-                                <Grid item md={4} xs={10} style={{ padding: 15 }}>
-                                    <Card >
-                                        <CardContent style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-                                            <DoughnutChart
-                                                heading={"Clicks Response"}
-                                                chartData={{
-                                                    labels: ['Happy', 'Moderate', 'Angry'],
-                                                    datasets: [
-                                                        {
-                                                            label: 'Population',
-                                                            data: [
-                                                                this.state.countClicks['happy'],
-                                                                this.state.countClicks['moderat'],
-                                                                this.state.countClicks['angry']
-                                                            ],
-                                                            backgroundColor: [
-                                                                '#4FAB56',
-                                                                '#F99D2C',
-                                                                '#E83E3B'
-
-                                                            ]
-                                                        }
-                                                    ]
-                                                }}
-                                            />
-                                        </CardContent>
-                                    </Card>
-                                </Grid>
                             </Grid>
                             {/* <Grid container justify='center' direction={'row'}>
                                 <Grid item md={10} xs={10} style={{ padding: 15 }}>
@@ -872,36 +964,7 @@ class Monthly extends Component {
                                     </Card>
                                 </Grid>
                             </Grid> */}
-                            <Grid container justify='center' direction={'row'}>
-                                <Grid item md={10} xs={10} style={{ padding: 15 }}>
-                                    <Card >
-                                        <CardContent style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-                                            <BarChart heading={"Monthly Response"}
-                                                chartData={{
-                                                    labels: this.state.datesArray, //x-axis label array
-                                                    datasets: [
-                                                        {
-                                                            label: 'Happy',
-                                                            data: this.state.happyMonthCountArray,
-                                                            backgroundColor: "#4FAB56"
-                                                        },
-                                                        {
-                                                            label: 'Moderate',
-                                                            data: this.state.moderatMonthCountArray,
-                                                            backgroundColor: '#F99D2C'
-                                                        },
-                                                        {
-                                                            label: 'Angry',
-                                                            data: this.state.angryMonthCountArray,
-                                                            backgroundColor: "#E83E3B"
-                                                        }
-                                                    ]
-                                                }}
-                                            />
-                                        </CardContent>
-                                    </Card>
-                                </Grid>
-                            </Grid>
+
                             <Grid container justify="center" direction="row">
                                 <Grid item md={12} xs={10} style={{ padding: 15 }}>
                                     <Card>

@@ -81,6 +81,7 @@ class Weekly extends Component {
         this.clicksObject = {};
         this.lastDate = 0;
         this.responseArray = [];
+        this.angryReasonsCount = {};
 
 
         this.state = {
@@ -101,7 +102,13 @@ class Weekly extends Component {
             responseArray: [],
             isProgress: false,
             responseArrayIterations: 10,
-            stopPaging: false
+            stopPaging: false,
+            angryReasonsCount: {
+                'Waiting Time': 0,
+                'Bad Service': 0,
+                'Enviroment': 0,
+                'Attitude': 0
+            },
         }
     }
 
@@ -331,6 +338,13 @@ class Weekly extends Component {
                         angryCount = 1
                     }
 
+                    //reasons
+
+                    if (this.angryReasonsCount[data.reason]) {
+                        this.angryReasonsCount[data.reason] += 1
+                    } else {
+                        this.angryReasonsCount[data.reason] = 1;
+                    }
 
                     let index = 0, flag = false;
                     for (let i = 0; i <= this.responseArray.length; i++) {
@@ -391,6 +405,7 @@ class Weekly extends Component {
                 happyWeekCountArray: [...this.happyWeekCountArray],
                 angryWeekCountArray: [...this.angryWeekCountArray],
                 countClicks: this.clicksObject,
+                angryReasonsCount: this.angryReasonsCount,
                 responseArray: this.responseArray.slice(0, 10)
             }, function () {
                 console.log('this.state.countClick: ', this.state.countClicks);
@@ -401,6 +416,7 @@ class Weekly extends Component {
                 this.angryWeekCount = 0;
                 this.happyWeekCount = 0;
                 this.clicksObject = {};
+                this.angryReasonsCount = {};
             });
         }
     }
@@ -679,9 +695,8 @@ class Weekly extends Component {
                                     </Card>
                                 </Grid>
                             </Grid>
-
                             <Grid container justify='center' direction={'row'}>
-                                <Grid item md={8} xs={10} style={{ padding: 15 }}>
+                                <Grid item md={12} xs={10} style={{ padding: 15 }}>
                                     <Card >
                                         <CardContent style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
                                             <BarChart heading={"Weekly Response"}
@@ -731,6 +746,9 @@ class Weekly extends Component {
                                         </CardContent>
                                     </Card>
                                 </Grid>
+                            </Grid>
+                            <Grid container justify='center' direction={'row'}>
+
                                 <Grid item md={4} xs={10} style={{ padding: 15 }}>
                                     <Card >
                                         <CardContent style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -759,7 +777,55 @@ class Weekly extends Component {
                                         </CardContent>
                                     </Card>
                                 </Grid>
+                                <Grid item md={8} xs={10} style={{ padding: 15 }}>
+                                    <Card CardContent style={{ height: '100%' }}>
+                                        <CardContent style={{ height: '100%' }}>
+                                            <Typography variant="subheading" style={{ textAlign: "center" }} gutterBottom>
+                                                PAIN POINTS
+                                            </Typography>
+                                            <div>
+                                                <div>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                                        <Typography variant="caption">Waiting Time</Typography>
+                                                        <div>
+                                                            {this.state.angryReasonsCount['Waiting Time']}
+                                                        </div>
+                                                    </div>
+                                                    <Progress size="tiny" percent={this.state.angryReasonsCount['Waiting Time'] + 5} color='red' />
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                                    <Typography variant="caption">Enviroment</Typography>
+                                                    <div>
+                                                        {this.state.angryReasonsCount['Enviroment']}
+                                                    </div>
+                                                </div>
+                                                <Progress size="tiny" percent={this.state.angryReasonsCount['Enviroment'] + 5} color='brown' />
+                                            </div>
+                                            <div>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                                    <Typography variant="caption">Attitude</Typography>
+                                                    <div>
+                                                        {this.state.angryReasonsCount['Attitude']}
+                                                    </div>
+                                                </div>
+                                                <Progress size="tiny" percent={this.state.angryReasonsCount['Attitude'] + 5} color='teal' />
+                                            </div>
+                                            <div>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                                    <Typography variant="caption">Bad Service</Typography>
+                                                    <div>
+                                                        {this.state.angryReasonsCount['Bad Service']}
+                                                    </div>
+                                                </div>
+                                                <Progress size="tiny" percent={this.state.angryReasonsCount['Bad Service'] + 5} color='blue' />
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                </Grid>
                             </Grid>
+
                             {/* <Grid container justify='center' direction={'row'}>
                                 <Grid item md={10} xs={10} style={{ padding: 15 }}>
                                     <Card >

@@ -37,9 +37,10 @@ export default class AuthActions {
       payload: userPayload
     };
   }
-  static SignOutUser() {
+  static SignOutUser(history) {
     return{
-      type:actionTypes.SIGNOUT_PROG
+      type:actionTypes.SIGNOUT_PROG,
+      payload: history
     }
   }
 }
